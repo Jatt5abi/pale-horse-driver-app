@@ -1,0 +1,9 @@
+{
+  "name": "pale-horse-driver-app",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "pdf-lib": "^1.17.1",
+    "resend": "^3.2.0"
+  }
+}

@@ -1,4 +1,4 @@
-const V = 'v7';
+const V = 'v8';
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(V).then(c => c.addAll(['/', '/index.html', '/manifest.json', '/logo.png'])));
 });

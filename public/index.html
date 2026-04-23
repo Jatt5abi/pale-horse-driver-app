@@ -351,7 +351,7 @@
     <div class="field"><label>I consent to a full query of the FMCSA Drug &amp; Alcohol Clearinghouse *</label>
       <div class="radio-group" id="rg_clearinghouseConsent">
         <div class="radio-opt" id="clearinghouseConsent_yes" onclick="radio('clearinghouseConsent','yes')">Yes — I consent</div>
-        <div class="radio-opt" id="clearinghouseConsent_no" onclick="radio('clearinghouseConsent','no')">No — I do not consent</div>
+        <div class="radio-opt" id="clearinghouseConsent_no" onclick="radio('clearinghouseConsent','no')">No — I do not consent (cannot proceed)</div>
       </div>
     </div>
     <p class="hint">Refusing consent may disqualify you from CDL positions per FMCSA regulations.</p>
@@ -783,9 +783,9 @@ const tabRules = {
     if(!state.violations){document.getElementById('rg_violations').classList.add('err');errs.push('Violation history required');}
     if(!state.drugTest){document.getElementById('rg_drugTest').classList.add('err');errs.push('Drug/alcohol test question required');}
     if(!state.refusedTest){document.getElementById('rg_refusedTest').classList.add('err');errs.push('Test refusal question required');}
-    if(['A','B'].includes(v('dlClass')) && !state.clearinghouseConsent){
+    if(['A','B'].includes(v('dlClass')) && state.clearinghouseConsent !== 'yes'){
       document.getElementById('rg_clearinghouseConsent').classList.add('err');
-      errs.push('FMCSA Clearinghouse consent required for CDL Class A/B');
+      errs.push('FMCSA Clearinghouse consent is required by DOT — you must consent to continue');
     }
     return errs;
   },

@@ -160,24 +160,24 @@ async function buildApplicationPDF(d) {
   addText(page, 'I certify that all information is true and complete. False statements may result in refusal of employment or discharge.', 40, y, font, 8, rgb(0.4,0.4,0.4));
   y -= 20;
   addText(page, 'Printed Name:', 40, y, font, 8, rgb(0.5,0.5,0.5));
-  addText(page, d.sigName, 120, y, bold, 11);
+  addText(page, d.sigName||'', 130, y, bold, 11);
   addText(page, 'Date:', 380, y, font, 8, rgb(0.5,0.5,0.5));
-  addText(page, d.sigDate, 410, y, bold, 11);
-  y -= 24;
-  // Embed drawn signature
+  addText(page, d.sigDate||'', 410, y, bold, 11);
+  y -= 54; // space for signature image above sign line
+  const appLineY = y;
   if (d.signature) {
     try {
       const sigBytes = Buffer.from(d.signature, 'base64');
       const sigImg = await doc.embedPng(sigBytes);
       const { width: sw, height: sh } = sigImg.scale(1);
       const sigW = Math.min(200, sw);
-      const sigH = (sh / sw) * sigW;
-      page.drawImage(sigImg, { x: 40, y: y - sigH, width: sigW, height: sigH });
-      y -= sigH + 8;
-    } catch(e) { y -= 8; }
+      const sigH = Math.min(48, (sh/sw)*sigW);
+      page.drawImage(sigImg, { x: 40, y: appLineY+1, width: sigW, height: sigH });
+    } catch(e) {}
   }
-  page.drawLine({ start:{x:40,y}, end:{x:280,y}, thickness:0.5, color:rgb(0.3,0.3,0.3) });
-  addText(page, 'Applicant Signature', 40, y-12, font, 7, rgb(0.6,0.6,0.6));
+  page.drawLine({ start:{x:40,y:appLineY}, end:{x:280,y:appLineY}, thickness:0.5, color:rgb(0.3,0.3,0.3) });
+  addText(page, 'Applicant Signature', 40, appLineY-14, font, 7, rgb(0.6,0.6,0.6));
+  y = appLineY - 22;
 
   // Page numbers
   const total = doc.getPageCount();
@@ -255,21 +255,24 @@ async function buildW4(d) {
   y -= 16;
   addText(page, 'Under penalties of perjury, I declare this certificate is correct to the best of my knowledge.', 40, y, font, 8, rgb(0.4,0.4,0.4));
   y -= 24;
-  addText(page, 'Employee Signature:', 40, y, font, 8, rgb(0.5,0.5,0.5));
-  page.drawLine({ start:{x:150,y:y-2}, end:{x:360,y:y-2}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
   addText(page, 'Date:', 370, y, font, 8, rgb(0.5,0.5,0.5));
-  if (d.sigDate) addText(page, d.sigDate, 400, y, font, 10);
-  page.drawLine({ start:{x:400,y:y-2}, end:{x:560,y:y-2}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
+  addText(page, d.sigDate||'', 400, y, bold, 10);
+  y -= 54;
+  const w4LineY = y;
   if (d.signature) {
     try {
       const sigBytes = Buffer.from(d.signature, 'base64');
       const sigImg = await doc.embedPng(sigBytes);
       const {width:sw,height:sh} = sigImg.scale(1);
-      const sigW = Math.min(180,sw), sigH = (sh/sw)*sigW;
-      page.drawImage(sigImg, {x:150, y:y-sigH, width:sigW, height:sigH});
-      y -= sigH + 8;
-    } catch(e) { y -= 28; }
-  } else { y -= 28; }
+      const sigW = Math.min(180,sw), sigH = Math.min(48,(sh/sw)*sigW);
+      page.drawImage(sigImg, {x:40, y:w4LineY+1, width:sigW, height:sigH});
+    } catch(e) {}
+  }
+  page.drawLine({ start:{x:40,y:w4LineY}, end:{x:340,y:w4LineY}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
+  page.drawLine({ start:{x:360,y:w4LineY}, end:{x:560,y:w4LineY}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
+  addText(page, 'Employee Signature', 40, w4LineY-14, font, 7, rgb(0.6,0.6,0.6));
+  addText(page, 'Date', 360, w4LineY-14, font, 7, rgb(0.6,0.6,0.6));
+  y = w4LineY - 24;
 
   addText(page, "Employer: Pale Horse Asphalt Engineering  |  19256 California Hwy 99, Acampo CA 95220", 40, y, font, 9);
   y -= 16;
@@ -337,21 +340,24 @@ async function buildDE4(d) {
   y -= 16;
   addText(page, 'Under penalty of perjury, I certify that the number of withholding allowances claimed is correct.', 40, y, font, 8, rgb(0.4,0.4,0.4));
   y -= 24;
-  addText(page, 'Employee Signature:', 40, y, font, 8, rgb(0.5,0.5,0.5));
-  page.drawLine({ start:{x:150,y:y-2}, end:{x:360,y:y-2}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
   addText(page, 'Date:', 370, y, font, 8, rgb(0.5,0.5,0.5));
-  if (d.sigDate) addText(page, d.sigDate, 400, y, font, 10);
-  page.drawLine({ start:{x:400,y:y-2}, end:{x:560,y:y-2}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
+  addText(page, d.sigDate||'', 400, y, bold, 10);
+  y -= 54;
+  const de4LineY = y;
   if (d.signature) {
     try {
       const sigBytes = Buffer.from(d.signature, 'base64');
       const sigImg = await doc.embedPng(sigBytes);
       const {width:sw,height:sh} = sigImg.scale(1);
-      const sigW = Math.min(180,sw), sigH = (sh/sw)*sigW;
-      page.drawImage(sigImg, {x:150, y:y-sigH, width:sigW, height:sigH});
-      y -= sigH + 8;
-    } catch(e) { y -= 28; }
-  } else { y -= 28; }
+      const sigW = Math.min(180,sw), sigH = Math.min(48,(sh/sw)*sigW);
+      page.drawImage(sigImg, {x:40, y:de4LineY+1, width:sigW, height:sigH});
+    } catch(e) {}
+  }
+  page.drawLine({ start:{x:40,y:de4LineY}, end:{x:340,y:de4LineY}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
+  page.drawLine({ start:{x:360,y:de4LineY}, end:{x:560,y:de4LineY}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
+  addText(page, 'Employee Signature', 40, de4LineY-14, font, 7, rgb(0.6,0.6,0.6));
+  addText(page, 'Date', 360, de4LineY-14, font, 7, rgb(0.6,0.6,0.6));
+  y = de4LineY - 24;
 
   addText(page, "Employer: Pale Horse Asphalt Engineering  |  19256 California Hwy 99, Acampo CA 95220", 40, y, font, 9);
   y -= 30;
@@ -470,22 +476,24 @@ async function buildDirectDeposit(d) {
   ], y, font, bold, W);
   y -= 24;
 
-  addText(page, 'Employee Signature:', 40, y, font, 8, rgb(0.5,0.5,0.5));
-  page.drawLine({ start:{x:150,y:y-2}, end:{x:360,y:y-2}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
   addText(page, 'Date:', 370, y, font, 8, rgb(0.5,0.5,0.5));
-  if (d.sigDate) addText(page, d.sigDate, 400, y, font, 10);
-  page.drawLine({ start:{x:400,y:y-2}, end:{x:560,y:y-2}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
+  addText(page, d.sigDate||'', 400, y, bold, 10);
+  y -= 54;
+  const ddLineY = y;
   if (d.signature) {
     try {
       const sigBytes = Buffer.from(d.signature, 'base64');
       const sigImg = await doc.embedPng(sigBytes);
       const { width: sw, height: sh } = sigImg.scale(1);
-      const sigW = Math.min(180, sw);
-      const sigH = (sh/sw)*sigW;
-      page.drawImage(sigImg, { x: 150, y: y-sigH, width: sigW, height: sigH });
-      y -= sigH + 8;
-    } catch(e) { y -= 28; }
-  } else { y -= 28; }
+      const sigW = Math.min(180, sw), sigH = Math.min(48,(sh/sw)*sigW);
+      page.drawImage(sigImg, { x: 40, y: ddLineY+1, width: sigW, height: sigH });
+    } catch(e) {}
+  }
+  page.drawLine({ start:{x:40,y:ddLineY}, end:{x:340,y:ddLineY}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
+  page.drawLine({ start:{x:360,y:ddLineY}, end:{x:560,y:ddLineY}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
+  addText(page, 'Employee Signature', 40, ddLineY-14, font, 7, rgb(0.6,0.6,0.6));
+  addText(page, 'Date', 360, ddLineY-14, font, 7, rgb(0.6,0.6,0.6));
+  y = ddLineY - 24;
 
   addText(page, 'Attach a voided check or bank letter to verify routing and account numbers.', 40, y-10, font, 8, rgb(0.6,0.6,0.6));
 
@@ -603,23 +611,20 @@ async function buildClearinghousePage(d) {
   addText(page, `${d.firstName} ${d.lastName}`, 130, y, bold, 11);
   addText(page, 'Date:', 390, y, font, 8, rgb(0.5,0.5,0.5));
   addText(page, d.sigDate || d.appDate || '', 420, y, bold, 11);
-  y -= 30;
-
+  y -= 54;
+  const clLineY = y;
   if (d.signature) {
     try {
       const sigBytes = Buffer.from(d.signature, 'base64');
       const sigImg = await doc.embedPng(sigBytes);
       const {width:sw, height:sh} = sigImg.scale(1);
-      const sigW = Math.min(180, sw), sigH = (sh/sw)*sigW;
-      page.drawImage(sigImg, {x:40, y:y-sigH, width:sigW, height:sigH});
-      y -= sigH + 6;
-    } catch(e) { y -= 30; }
-  } else { y -= 30; }
-
-  page.drawLine({ start:{x:40,y}, end:{x:280,y}, thickness:0.5, color:rgb(0.3,0.3,0.3) });
-  y -= 12;
-  addText(page, 'Applicant Signature', 40, y, font, 7, rgb(0.6,0.6,0.6));
-  y -= 30;
+      const sigW = Math.min(180, sw), sigH = Math.min(48,(sh/sw)*sigW);
+      page.drawImage(sigImg, {x:40, y:clLineY+1, width:sigW, height:sigH});
+    } catch(e) {}
+  }
+  page.drawLine({ start:{x:40,y:clLineY}, end:{x:280,y:clLineY}, thickness:0.5, color:rgb(0.3,0.3,0.3) });
+  addText(page, 'Applicant Signature', 40, clLineY-14, font, 7, rgb(0.6,0.6,0.6));
+  y = clLineY - 30;
   addText(page, 'This form is retained in the driver qualification file per 49 CFR §391.51.', 40, y, font, 7, rgb(0.6,0.6,0.6));
 
   return doc.save();

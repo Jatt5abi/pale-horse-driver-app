@@ -139,7 +139,7 @@ async function buildApplicationPDF(d) {
     ['Drug/Alcohol Test Positive', d.drugTest],
     ['Test Refusal', d.refusedTest],
     ...(d.clearinghouseConsent ? [['FMCSA Clearinghouse Consent', d.clearinghouseConsent === 'yes' ? 'Yes — Consented' : 'No — Refused']] : []),
-    ...(d.hos7DayCert ? [['HOS 7-Day Certification', d.hos7DayCert === 'yes' ? 'Certified — No violations last 7 days' : 'Not certified']] : []),
+    ...(d.hosLog && d.hosLog.length ? [['HOS 7-Day Log', d.hosLog.map(r => `${r.date}: ${r.offDuty ? 'Off Duty' : (r.hours != null ? r.hours + 'h' : '—')}`).join('  ')]] : []),
     ['', ''],
   ], y, font, bold, W);
   y -= 8;
@@ -509,17 +509,24 @@ async function buildIDPage(d) {
   page.drawLine({ start:{x:40,y}, end:{x:W-40,y}, thickness:1, color:rgb(0.91,0.45,0.04) });
   y -= 16;
 
-  const embedImg = async (b64, label, yPos) => {
+  const embedImg = async (b64, label, yPos, isPdf) => {
     if (!b64) return yPos;
     try {
       const bytes = Buffer.from(b64, 'base64');
-      const img = await doc.embedJpg(bytes).catch(() => doc.embedPng(bytes));
-      const { width: iw, height: ih } = img.scale(1);
-      const maxW = 240, maxH = 160;
-      const scale = Math.min(maxW/iw, maxH/ih);
-      const w = iw*scale, h = ih*scale;
       addText(page, label, 40, yPos, bold, 9, rgb(0.91,0.45,0.04));
       yPos -= 12;
+      if (isPdf) {
+        const [embPage] = await doc.embedPdf(bytes, [0]);
+        const { width: pw, height: ph } = embPage;
+        const scale = Math.min(240/pw, 320/ph);
+        const w = pw*scale, h = ph*scale;
+        page.drawPage(embPage, { x: 40, y: yPos - h, width: w, height: h });
+        return yPos - h - 16;
+      }
+      const img = await doc.embedJpg(bytes).catch(() => doc.embedPng(bytes));
+      const { width: iw, height: ih } = img.scale(1);
+      const scale = Math.min(240/iw, 160/ih);
+      const w = iw*scale, h = ih*scale;
       page.drawImage(img, { x: 40, y: yPos - h, width: w, height: h });
       return yPos - h - 16;
     } catch(e) { return yPos; }
@@ -532,12 +539,12 @@ async function buildIDPage(d) {
 
   const id2Label = d.id2Type === 'ss' ? 'Social Security Card' : d.id2Type === 'passport' ? 'Passport' : 'Birth Certificate';
   addText(page, id2Label.toUpperCase(), 40, y, bold, 10, rgb(0,0,0)); y -= 16;
-  y = await embedImg(d.id2, id2Label, y);
+  y = await embedImg(d.id2, id2Label, y, d.id2IsPdf);
 
   if (d.medCard) {
     y -= 8;
     addText(page, 'DOT MEDICAL CARD', 40, y, bold, 10, rgb(0,0,0)); y -= 16;
-    y = await embedImg(d.medCard, "Medical Examiner's Certificate", y);
+    y = await embedImg(d.medCard, "Medical Examiner's Certificate", y, d.medCardIsPdf);
   }
 
   addText(page, 'Documents verified by employer per I-9 requirements.', 40, 30, font, 7, rgb(0.6,0.6,0.6));

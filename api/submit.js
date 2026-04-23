@@ -130,8 +130,12 @@ async function buildApplicationPDF(d) {
 
   // Experience
   y = sectionHeader(page, 'Driving Experience & Safety', y, bold, W);
+  // Vehicles full-width (can be a long list)
+  addText(page, 'VEHICLES OPERATED', 40, y, font, 8, rgb(0.5,0.5,0.5));
+  y -= 14;
+  addText(page, d.vehicles || 'Not specified', 40, y, bold, 10);
+  y -= 26;
   y = twoCol(page, [
-    ['Vehicles Operated', d.vehicles || 'Not specified'],
     ['Approx Miles (3 yr)', d.miles],
     ['Years CDL Experience', d.yearsExp],
     ['Accidents (3 yr)', d.accidents === 'none' ? 'None' : d.accidentDetails || d.accidents],
@@ -139,10 +143,24 @@ async function buildApplicationPDF(d) {
     ['Drug/Alcohol Test Positive', d.drugTest],
     ['Test Refusal', d.refusedTest],
     ...(d.clearinghouseConsent ? [['FMCSA Clearinghouse Consent', d.clearinghouseConsent === 'yes' ? 'Yes — Consented' : 'No — Refused']] : []),
-    ...(d.hosLog && d.hosLog.length ? [['HOS 7-Day Log', d.hosLog.map(r => `${r.date}: ${r.offDuty ? 'Off Duty' : (r.hours != null ? r.hours + 'h' : '—')}`).join('  ')]] : []),
     ['', ''],
   ], y, font, bold, W);
   y -= 8;
+  // HOS 7-day log — one line per day
+  if (d.hosLog && d.hosLog.length) {
+    if (y < 160) { page = doc.addPage([612,792]); y = 750; }
+    addText(page, 'HOS 7-DAY LOG', 40, y, font, 8, rgb(0.5,0.5,0.5)); y -= 14;
+    const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    for (const r of d.hosLog) {
+      const dt = new Date(r.date + 'T12:00:00');
+      const label = `${DAYS[dt.getDay()]} ${r.date}`;
+      const val = r.offDuty ? 'Off Duty' : (r.hours != null ? `${r.hours} hrs on duty` : '—');
+      addText(page, label, 40, y, font, 9, rgb(0.3,0.3,0.3));
+      addText(page, val, 180, y, bold, 9);
+      y -= 14;
+    }
+    y -= 8;
+  }
 
   // Emergency
   y = sectionHeader(page, 'Emergency Contact', y, bold, W);
@@ -268,10 +286,8 @@ async function buildW4(d) {
       page.drawImage(sigImg, {x:40, y:w4LineY+1, width:sigW, height:sigH});
     } catch(e) {}
   }
-  page.drawLine({ start:{x:40,y:w4LineY}, end:{x:340,y:w4LineY}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
-  page.drawLine({ start:{x:360,y:w4LineY}, end:{x:560,y:w4LineY}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
+  page.drawLine({ start:{x:40,y:w4LineY}, end:{x:560,y:w4LineY}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
   addText(page, 'Employee Signature', 40, w4LineY-14, font, 7, rgb(0.6,0.6,0.6));
-  addText(page, 'Date', 360, w4LineY-14, font, 7, rgb(0.6,0.6,0.6));
   y = w4LineY - 24;
 
   addText(page, "Employer: Pale Horse Asphalt Engineering  |  19256 California Hwy 99, Acampo CA 95220", 40, y, font, 9);
@@ -353,10 +369,8 @@ async function buildDE4(d) {
       page.drawImage(sigImg, {x:40, y:de4LineY+1, width:sigW, height:sigH});
     } catch(e) {}
   }
-  page.drawLine({ start:{x:40,y:de4LineY}, end:{x:340,y:de4LineY}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
-  page.drawLine({ start:{x:360,y:de4LineY}, end:{x:560,y:de4LineY}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
+  page.drawLine({ start:{x:40,y:de4LineY}, end:{x:560,y:de4LineY}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
   addText(page, 'Employee Signature', 40, de4LineY-14, font, 7, rgb(0.6,0.6,0.6));
-  addText(page, 'Date', 360, de4LineY-14, font, 7, rgb(0.6,0.6,0.6));
   y = de4LineY - 24;
 
   addText(page, "Employer: Pale Horse Asphalt Engineering  |  19256 California Hwy 99, Acampo CA 95220", 40, y, font, 9);
@@ -414,11 +428,22 @@ async function buildI9(d) {
   y -= 16;
   addText(page, 'I attest, under penalty of perjury, that the above information is true and correct.', 40, y, font, 8, rgb(0.4,0.4,0.4));
   y -= 24;
-  addText(page, 'Signature:', 40, y, font, 8, rgb(0.5,0.5,0.5));
-  page.drawLine({ start:{x:100,y:y-2}, end:{x:360,y:y-2}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
   addText(page, 'Date:', 370, y, font, 8, rgb(0.5,0.5,0.5));
-  page.drawLine({ start:{x:400,y:y-2}, end:{x:560,y:y-2}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
-  y -= 36;
+  addText(page, d.sigDate||'', 400, y, bold, 10);
+  y -= 54;
+  const i9LineY = y;
+  if (d.signature) {
+    try {
+      const sigBytes = Buffer.from(d.signature, 'base64');
+      const sigImg = await doc.embedPng(sigBytes);
+      const {width:sw,height:sh} = sigImg.scale(1);
+      const sigW = Math.min(180,sw), sigH = Math.min(48,(sh/sw)*sigW);
+      page.drawImage(sigImg, {x:40, y:i9LineY+1, width:sigW, height:sigH});
+    } catch(e) {}
+  }
+  page.drawLine({ start:{x:40,y:i9LineY}, end:{x:560,y:i9LineY}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
+  addText(page, 'Employee Signature', 40, i9LineY-14, font, 7, rgb(0.6,0.6,0.6));
+  y = i9LineY - 24;
 
   addText(page, 'SECTION 2 — EMPLOYER REVIEW (completed by employer on or before first day of work)', 40, y, bold, 10, rgb(0.91,0.45,0.04));
   y -= 16;
@@ -489,10 +514,8 @@ async function buildDirectDeposit(d) {
       page.drawImage(sigImg, { x: 40, y: ddLineY+1, width: sigW, height: sigH });
     } catch(e) {}
   }
-  page.drawLine({ start:{x:40,y:ddLineY}, end:{x:340,y:ddLineY}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
-  page.drawLine({ start:{x:360,y:ddLineY}, end:{x:560,y:ddLineY}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
+  page.drawLine({ start:{x:40,y:ddLineY}, end:{x:560,y:ddLineY}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
   addText(page, 'Employee Signature', 40, ddLineY-14, font, 7, rgb(0.6,0.6,0.6));
-  addText(page, 'Date', 360, ddLineY-14, font, 7, rgb(0.6,0.6,0.6));
   y = ddLineY - 24;
 
   addText(page, 'Attach a voided check or bank letter to verify routing and account numbers.', 40, y-10, font, 8, rgb(0.6,0.6,0.6));
@@ -549,13 +572,43 @@ async function buildIDPage(d) {
   addText(page, id2Label.toUpperCase(), 40, y, bold, 10, rgb(0,0,0)); y -= 16;
   y = await embedImg(d.id2, id2Label, y, d.id2IsPdf);
 
-  if (d.medCard) {
-    y -= 8;
-    addText(page, 'DOT MEDICAL CARD', 40, y, bold, 10, rgb(0,0,0)); y -= 16;
-    y = await embedImg(d.medCard, "Medical Examiner's Certificate", y, d.medCardIsPdf);
-  }
-
   addText(page, 'Documents verified by employer per I-9 requirements.', 40, 30, font, 7, rgb(0.6,0.6,0.6));
+
+  if (d.medCard) {
+    // Medical card on its own page — PDFs especially need full page
+    page = doc.addPage([612, 792]);
+    let my = 760;
+    await embedLogo(doc, page, 40, my, 120);
+    addText(page, 'DOT Medical Examiner\'s Certificate', 175, my-10, bold, 13);
+    addText(page, `${d.firstName} ${d.lastName}  —  ${d.appDate}`, 175, my-26, font, 9, rgb(0.5,0.5,0.5));
+    my -= 60;
+    page.drawLine({ start:{x:40,y:my}, end:{x:572,y:my}, thickness:1, color:rgb(0.91,0.45,0.04) });
+    my -= 20;
+    if (d.medCardIsPdf) {
+      try {
+        const bytes = Buffer.from(d.medCard, 'base64');
+        const [embPage] = await doc.embedPdf(bytes, [0]);
+        const { width: pw, height: ph } = embPage;
+        const maxH = my - 40;
+        const scale = Math.min(532/pw, maxH/ph);
+        const w = pw*scale, h = ph*scale;
+        page.drawPage(embPage, { x: 40, y: my - h, width: w, height: h });
+      } catch(e) {
+        addText(page, 'Medical card PDF could not be rendered.', 40, my, font, 10, rgb(0.8,0.2,0.2));
+      }
+    } else {
+      try {
+        const bytes = Buffer.from(d.medCard, 'base64');
+        const img = await doc.embedJpg(bytes).catch(() => doc.embedPng(bytes));
+        const { width: iw, height: ih } = img.scale(1);
+        const maxH = my - 40;
+        const scale = Math.min(532/iw, maxH/ih);
+        const w = iw*scale, h = ih*scale;
+        page.drawImage(img, { x: 40, y: my - h, width: w, height: h });
+      } catch(e) {}
+    }
+    addText(page, '49 CFR §391.41 — Medical certificate required for CDL drivers.', 40, 18, font, 7, rgb(0.6,0.6,0.6));
+  }
 
   return doc.save();
 }

@@ -1,4 +1,4 @@
-const V = 'v1';
+const V = 'v2';
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(V).then(c => c.addAll(['/', '/index.html', '/manifest.json'])));
 });

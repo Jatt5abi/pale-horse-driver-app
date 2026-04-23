@@ -65,7 +65,7 @@ function section(pages, doc, font, boldFont, title, rows, yStart) {
 // ── PDF builder ──────────────────────────────────────────────────────────────
 
 async function buildApplicationPDF(d) {
-  const doc = PDFDocument.create();
+  const doc = await PDFDocument.create();
   const font = await doc.embedFont(StandardFonts.Helvetica);
   const boldFont = await doc.embedFont(StandardFonts.HelveticaBold);
 
@@ -189,7 +189,7 @@ async function buildApplicationPDF(d) {
 // ── W-4 builder ──────────────────────────────────────────────────────────────
 
 async function buildW4(d) {
-  const doc = PDFDocument.create();
+  const doc = await PDFDocument.create();
   const font = await doc.embedFont(StandardFonts.Helvetica);
   const boldFont = await doc.embedFont(StandardFonts.HelveticaBold);
 
@@ -303,7 +303,7 @@ async function buildW4(d) {
 // ── DE-4 builder ─────────────────────────────────────────────────────────────
 
 async function buildDE4(d) {
-  const doc = PDFDocument.create();
+  const doc = await PDFDocument.create();
   const font = await doc.embedFont(StandardFonts.Helvetica);
   const boldFont = await doc.embedFont(StandardFonts.HelveticaBold);
 
@@ -396,7 +396,7 @@ async function buildDE4(d) {
 // ── I-9 builder ──────────────────────────────────────────────────────────────
 
 async function buildI9(d) {
-  const doc = PDFDocument.create();
+  const doc = await PDFDocument.create();
   const font = await doc.embedFont(StandardFonts.Helvetica);
   const boldFont = await doc.embedFont(StandardFonts.HelveticaBold);
 

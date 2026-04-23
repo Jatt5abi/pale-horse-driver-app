@@ -75,10 +75,9 @@
   <button class="tab" onclick="goTab(1)">License</button>
   <button class="tab" onclick="goTab(2)">Employment</button>
   <button class="tab" onclick="goTab(3)">Experience</button>
-  <button class="tab" onclick="goTab(4)">Emergency</button>
-  <button class="tab" onclick="goTab(5)">Tax Info</button>
-  <button class="tab" onclick="goTab(6)">Docs & Sig</button>
-  <button class="tab" onclick="goTab(7)">Submit</button>
+  <button class="tab" onclick="goTab(4)">Emergency & Tax</button>
+  <button class="tab" onclick="goTab(5)">Docs & Sig</button>
+  <button class="tab" onclick="goTab(6)">Submit</button>
 </div>
 
 <!-- ── 0 Personal ── -->
@@ -355,19 +354,9 @@
     <div class="field" style="margin-top:14px"><label>Type Full Name to Sign *</label><input id="sigName" type="text" placeholder="Full legal name"></div>
     <div class="field"><label>Date *</label><input id="sigDate" type="date"></div>
   </div>
-  <div class="nav-btns">
-    <button class="btn btn-secondary" onclick="goTab(3)">← Back</button>
-    <button class="btn btn-primary" onclick="nextTab(4,5)">Next: Tax Info →</button>
-  </div>
-</div>
-
-<!-- ── 5 Tax Info ── -->
-<div class="section" id="s5">
-  <div id="err5" class="alert"></div>
-
   <div class="card">
-    <div class="card-title">Federal W-4</div>
-    <div class="tax-note">This information determines your federal tax withholding. If unsure, use the IRS withholding estimator at irs.gov/w4app.</div>
+    <div class="card-title">Federal W-4 Withholding</div>
+    <div class="tax-note">This determines your federal tax withholding. See irs.gov/w4app if unsure.</div>
     <div class="field"><label>Filing Status *</label>
       <select id="w4FilingStatus">
         <option value="">— Select —</option>
@@ -376,23 +365,22 @@
         <option value="Head of Household">Head of Household</option>
       </select>
     </div>
-    <div class="field"><label>Step 2 — Multiple jobs or spouse works?</label>
+    <div class="field"><label>Both you and spouse work (or 2 jobs)?</label>
       <div class="radio-group" id="rg_w4MultiJob">
-        <div class="radio-opt" id="w4MultiJob_yes" onclick="radio('w4MultiJob','yes')">Yes — check box (c)</div>
+        <div class="radio-opt" id="w4MultiJob_yes" onclick="radio('w4MultiJob','yes')">Yes</div>
         <div class="radio-opt" id="w4MultiJob_no" onclick="radio('w4MultiJob','no')">No</div>
       </div>
-      <p class="hint">Check Yes if you and your spouse both work, or you have two jobs.</p>
     </div>
-    <div class="field"><label>Step 3 — Children under 17 (count)</label><input id="w4Children" type="number" min="0" max="20" placeholder="0"></div>
-    <div class="field"><label>Step 3 — Other dependents (count)</label><input id="w4OtherDep" type="number" min="0" max="20" placeholder="0"></div>
-    <div class="field"><label>Step 4a — Other income not from jobs ($/yr)</label><input id="w4OtherIncome" type="text" placeholder="0"></div>
-    <div class="field"><label>Step 4b — Deductions (from IRS worksheet, $/yr)</label><input id="w4Deductions" type="text" placeholder="0"></div>
-    <div class="field"><label>Step 4c — Extra withholding per pay period ($)</label><input id="w4Extra" type="text" placeholder="0"></div>
+    <div class="row">
+      <div class="field"><label>Children under 17</label><input id="w4Children" type="number" min="0" max="20" placeholder="0"></div>
+      <div class="field"><label>Other dependents</label><input id="w4OtherDep" type="number" min="0" max="20" placeholder="0"></div>
+    </div>
+    <div class="field"><label>Extra withholding per pay period ($)</label><input id="w4Extra" type="text" placeholder="0"></div>
   </div>
 
   <div class="card">
-    <div class="card-title">California DE-4</div>
-    <div class="tax-note">California state withholding. If different from federal, complete separately. See edd.ca.gov for worksheets.</div>
+    <div class="card-title">California DE-4 Withholding</div>
+    <div class="tax-note">California state withholding. See edd.ca.gov for worksheets.</div>
     <div class="field"><label>CA Filing Status *</label>
       <select id="de4FilingStatus">
         <option value="">— Select —</option>
@@ -402,8 +390,10 @@
         <option value="Head of Household">Head of Household</option>
       </select>
     </div>
-    <div class="field"><label>Allowances — Line 1a (from Worksheet A)</label><input id="de4Allowances" type="number" min="0" max="99" placeholder="1"></div>
-    <div class="field"><label>Additional withholding per pay period ($)</label><input id="de4Extra" type="text" placeholder="0"></div>
+    <div class="row">
+      <div class="field mid"><label>Allowances (Line 1a)</label><input id="de4Allowances" type="number" min="0" max="99" placeholder="1"></div>
+      <div class="field"><label>Extra withholding/period ($)</label><input id="de4Extra" type="text" placeholder="0"></div>
+    </div>
     <div class="field"><label>Exempt from CA withholding?</label>
       <div class="radio-group" id="rg_de4Exempt">
         <div class="radio-opt" id="de4Exempt_no" onclick="radio('de4Exempt','no')">No</div>
@@ -413,14 +403,14 @@
   </div>
 
   <div class="nav-btns">
-    <button class="btn btn-secondary" onclick="goTab(4)">← Back</button>
-    <button class="btn btn-primary" onclick="nextTab(5,6)">Next: Docs & Sig →</button>
+    <button class="btn btn-secondary" onclick="goTab(3)">← Back</button>
+    <button class="btn btn-primary" onclick="nextTab(4,5)">Next: Docs & Sig →</button>
   </div>
 </div>
 
-<!-- ── 6 Docs & Signature ── -->
-<div class="section" id="s6">
-  <div id="err6" class="alert"></div>
+<!-- ── 5 Docs & Signature ── -->
+<div class="section" id="s5">
+  <div id="err5" class="alert"></div>
 
   <div class="card">
     <div class="card-title">Driver's License</div>
@@ -479,13 +469,13 @@
   </div>
 
   <div class="nav-btns">
-    <button class="btn btn-secondary" onclick="goTab(5)">← Back</button>
-    <button class="btn btn-primary" onclick="nextTab(6,7)">Next: Submit →</button>
+    <button class="btn btn-secondary" onclick="goTab(4)">← Back</button>
+    <button class="btn btn-primary" onclick="nextTab(5,6)">Next: Submit →</button>
   </div>
 </div>
 
-<!-- ── 7 Submit ── -->
-<div class="section" id="s7">
+<!-- ── 6 Submit ── -->
+<div class="section" id="s6">
   <div class="card">
     <div class="card-title">Ready to Submit</div>
     <p style="font-size:14px;color:#aaa;line-height:1.6;margin-bottom:16px;">Submitting will generate your complete driver file (Application + W-4 + DE-4 + I-9) and email it to Pale Horse Asphalt HR along with your ID photos.</p>
@@ -495,7 +485,7 @@
     <button class="btn btn-secondary" onclick="saveData()">💾 Save Progress</button>
     <button class="btn btn-danger" onclick="clearData()">🗑 Clear All</button>
   </div>
-  <div class="nav-btns"><button class="btn btn-secondary" onclick="goTab(6)">← Back</button></div>
+  <div class="nav-btns"><button class="btn btn-secondary" onclick="goTab(5)">← Back</button></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -589,7 +579,7 @@ function clearSig() { sigPad.clear(); }
 const _baseGoTab = goTab;
 goTab = function(n) {
   _baseGoTab(n);
-  if(n===6) setTimeout(()=>sigPad.setup(), 60);
+  if(n===5) setTimeout(()=>sigPad.setup(), 60);
 };
 
 function radio(name, val) {
@@ -658,15 +648,11 @@ const tabRules = {
   4: () => {
     const errs=[];
     [['ecName','Emergency Contact Name'],['ecRel','Emergency Contact Relationship'],['ecPhone','Emergency Contact Phone'],['sigName','Signature (typed name)'],['sigDate','Signature Date']].forEach(([id,lbl])=>{ if(!v(id)){markErr(id);errs.push(lbl+' is required');} });
-    return errs;
-  },
-  5: () => {
-    const errs=[];
     if(!v('w4FilingStatus')){markErr('w4FilingStatus');errs.push('Federal W-4 filing status required');}
     if(!v('de4FilingStatus')){markErr('de4FilingStatus');errs.push('CA DE-4 filing status required');}
     return errs;
   },
-  6: () => {
+  5: () => {
     const errs=[];
     if(!uploads.dlFront) errs.push('DL front photo required');
     if(!uploads.dlBack) errs.push('DL back photo required');

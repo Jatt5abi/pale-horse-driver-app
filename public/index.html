@@ -52,11 +52,12 @@
     .spinner{display:none;text-align:center;padding:20px;color:#888}
     .tax-note{background:#1e2a1e;border:1px solid #2a4a2a;border-radius:8px;padding:12px;font-size:12px;color:#8a8;line-height:1.6;margin-bottom:12px}
     /* uploads */
-    .upload-box{border:2px dashed #3a3a3a;border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s;position:relative}
-    .upload-box:hover,.upload-box.has-file{border-color:#e8730a}
-    .upload-box input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-    .upload-box .up-icon{font-size:28px;margin-bottom:6px}
-    .upload-box .up-label{font-size:13px;color:#888}
+    .upload-box{border:2px dashed #3a3a3a;border-radius:10px;padding:12px;text-align:center;transition:border-color .2s}
+    .upload-box.has-file{border-color:#e8730a}
+    .upload-box .up-btns{display:flex;gap:8px;justify-content:center;margin-bottom:6px}
+    .upload-btn{display:inline-flex;align-items:center;gap:6px;background:#2a2a2a;border:1px solid #444;border-radius:8px;padding:10px 16px;font-size:13px;color:#ccc;cursor:pointer;flex:1;justify-content:center}
+    .upload-btn:active{background:#3a3a3a}
+    .upload-btn input[type=file]{display:none}
     .upload-box .up-name{font-size:12px;color:#e8730a;margin-top:4px}
     .preview-img{width:100%;max-height:180px;object-fit:cover;border-radius:8px;margin-top:10px;display:none}
     /* signature pad */
@@ -455,9 +456,10 @@
     <div class="field">
       <label>Front of License *</label>
       <div class="upload-box" id="box_dlFront">
-        <input type="file" accept="image/*" onchange="handleUpload(this,'dlFront','prev_dlFront','box_dlFront')">
-        <div class="up-icon">📷</div>
-        <div class="up-label">Tap to take photo or upload</div>
+        <div class="up-btns">
+          <label class="upload-btn">📷 Camera<input type="file" accept="image/*" capture="environment" onchange="handleUpload(this,'dlFront','prev_dlFront','box_dlFront')"></label>
+          <label class="upload-btn">📁 File<input type="file" accept="image/*" onchange="handleUpload(this,'dlFront','prev_dlFront','box_dlFront')"></label>
+        </div>
         <div class="up-name" id="name_dlFront"></div>
       </div>
       <img id="prev_dlFront" class="preview-img">
@@ -465,9 +467,10 @@
     <div class="field">
       <label>Back of License *</label>
       <div class="upload-box" id="box_dlBack">
-        <input type="file" accept="image/*" onchange="handleUpload(this,'dlBack','prev_dlBack','box_dlBack')">
-        <div class="up-icon">📷</div>
-        <div class="up-label">Tap to take photo or upload</div>
+        <div class="up-btns">
+          <label class="upload-btn">📷 Camera<input type="file" accept="image/*" capture="environment" onchange="handleUpload(this,'dlBack','prev_dlBack','box_dlBack')"></label>
+          <label class="upload-btn">📁 File<input type="file" accept="image/*" onchange="handleUpload(this,'dlBack','prev_dlBack','box_dlBack')"></label>
+        </div>
         <div class="up-name" id="name_dlBack"></div>
       </div>
       <img id="prev_dlBack" class="preview-img">
@@ -490,9 +493,10 @@
     <div class="field">
       <label>Medical Examiner's Certificate *</label>
       <div class="upload-box" id="box_medCard">
-        <input type="file" accept="image/*,application/pdf" onchange="handleUpload(this,'medCard','prev_medCard','box_medCard')">
-        <div class="up-icon">🏥</div>
-        <div class="up-label">Tap to take photo or upload</div>
+        <div class="up-btns">
+          <label class="upload-btn">📷 Camera<input type="file" accept="image/*" capture="environment" onchange="handleUpload(this,'medCard','prev_medCard','box_medCard')"></label>
+          <label class="upload-btn">📁 File<input type="file" accept="image/*,application/pdf" onchange="handleUpload(this,'medCard','prev_medCard','box_medCard')"></label>
+        </div>
         <div class="up-name" id="name_medCard"></div>
       </div>
       <img id="prev_medCard" class="preview-img">
@@ -512,9 +516,10 @@
     <div class="field">
       <label>Upload *</label>
       <div class="upload-box" id="box_id2">
-        <input type="file" accept="image/*,application/pdf" onchange="handleUpload(this,'id2','prev_id2','box_id2')">
-        <div class="up-icon">📄</div>
-        <div class="up-label">Tap to take photo or upload</div>
+        <div class="up-btns">
+          <label class="upload-btn">📷 Camera<input type="file" accept="image/*" capture="environment" onchange="handleUpload(this,'id2','prev_id2','box_id2')"></label>
+          <label class="upload-btn">📁 File<input type="file" accept="image/*,application/pdf" onchange="handleUpload(this,'id2','prev_id2','box_id2')"></label>
+        </div>
         <div class="up-name" id="name_id2"></div>
       </div>
       <img id="prev_id2" class="preview-img">

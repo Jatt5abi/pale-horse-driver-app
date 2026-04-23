@@ -205,37 +205,36 @@ async function buildW4(d) {
   ], y, font, bold, W);
   y -= 8;
 
-  addText(page, 'FILING STATUS — check one below:', 40, y, bold, 9);
+  addText(page, 'STEP 1c — FILING STATUS', 40, y, bold, 10, rgb(0.91,0.45,0.04));
   y -= 20;
-  addText(page, '[ ]  Single or Married Filing Separately', 40, y, font, 10);
-  y -= 18;
-  addText(page, '[ ]  Married Filing Jointly (or Qualifying Surviving Spouse)', 40, y, font, 10);
-  y -= 18;
-  addText(page, '[ ]  Head of Household', 40, y, font, 10);
-  y -= 30;
+  const statuses = ['Single or Married Filing Separately','Married Filing Jointly','Head of Household'];
+  for (const s of statuses) {
+    const checked = d.w4FilingStatus === s;
+    addText(page, `${checked ? '[X]' : '[ ]'}  ${s}`, 40, y, checked ? bold : font, 10, checked ? rgb(0,0,0) : rgb(0.3,0.3,0.3));
+    y -= 18;
+  }
+  y -= 12;
 
   addText(page, 'STEP 2 — MULTIPLE JOBS OR SPOUSE WORKS', 40, y, bold, 10, rgb(0.91,0.45,0.04));
   y -= 20;
-  addText(page, '[ ]  (c) Check if only two jobs total (do the same on the other job\'s W-4)', 40, y, font, 10);
+  const mj = d.w4MultiJob === 'yes';
+  addText(page, `${mj ? '[X]' : '[ ]'}  (c) Two jobs total — check this box (and do the same on other job W-4)`, 40, y, mj ? bold : font, 10);
   y -= 30;
 
   addText(page, 'STEP 3 — CLAIM DEPENDENTS', 40, y, bold, 10, rgb(0.91,0.45,0.04));
   y -= 20;
-  addText(page, 'Multiply number of qualifying children under 17 by $2,000:  $__________', 40, y, font, 10);
-  y -= 18;
-  addText(page, 'Other dependents x $500:  $__________', 40, y, font, 10);
-  y -= 18;
-  addText(page, 'Total (add amounts above):  $__________', 40, y, font, 10);
-  y -= 30;
+  const childAmt = (parseInt(d.w4Children)||0) * 2000;
+  const otherAmt = (parseInt(d.w4OtherDep)||0) * 500;
+  const totalDep = childAmt + otherAmt;
+  addText(page, `Qualifying children under 17 x $2,000:  $${childAmt.toLocaleString()}`, 40, y, font, 10); y -= 18;
+  addText(page, `Other dependents x $500:  $${otherAmt.toLocaleString()}`, 40, y, font, 10); y -= 18;
+  addText(page, `Total:  $${totalDep.toLocaleString()}`, 40, y, bold, 10); y -= 30;
 
   addText(page, 'STEP 4 — OPTIONAL ADJUSTMENTS', 40, y, bold, 10, rgb(0.91,0.45,0.04));
   y -= 20;
-  addText(page, '(a) Other income not from jobs:  $__________', 40, y, font, 10);
-  y -= 18;
-  addText(page, '(b) Deductions (from Deductions Worksheet):  $__________', 40, y, font, 10);
-  y -= 18;
-  addText(page, '(c) Extra withholding per pay period:  $__________', 40, y, font, 10);
-  y -= 30;
+  addText(page, `(a) Other income not from jobs:  $${d.w4OtherIncome||'0'}`, 40, y, font, 10); y -= 18;
+  addText(page, `(b) Deductions:  $${d.w4Deductions||'0'}`, 40, y, font, 10); y -= 18;
+  addText(page, `(c) Extra withholding per pay period:  $${d.w4Extra||'0'}`, 40, y, font, 10); y -= 30;
 
   addText(page, 'STEP 5 — SIGN HERE', 40, y, bold, 10, rgb(0.91,0.45,0.04));
   y -= 16;
@@ -287,27 +286,27 @@ async function buildDE4(d) {
 
   addText(page, 'FILING STATUS — check one:', 40, y, bold, 10, rgb(0.91,0.45,0.04));
   y -= 20;
-  addText(page, '[ ]  Single', 40, y, font, 10);
-  y -= 18;
-  addText(page, '[ ]  Married (and your spouse does not work)', 40, y, font, 10);
-  y -= 18;
-  addText(page, '[ ]  Married (but withhold as Single or Married Filing Separately — two incomes)', 40, y, font, 10);
-  y -= 18;
-  addText(page, '[ ]  Head of Household', 40, y, font, 10);
-  y -= 30;
+  const de4Statuses = [
+    'Single',
+    'Married (spouse does not work)',
+    'Married (two incomes — withhold as Single)',
+    'Head of Household',
+  ];
+  for (const s of de4Statuses) {
+    const checked = d.de4FilingStatus === s;
+    addText(page, `${checked ? '[X]' : '[ ]'}  ${s}`, 40, y, checked ? bold : font, 10, checked ? rgb(0,0,0) : rgb(0.3,0.3,0.3));
+    y -= 18;
+  }
+  y -= 12;
 
   addText(page, 'ALLOWANCES', 40, y, bold, 10, rgb(0.91,0.45,0.04));
   y -= 20;
-  addText(page, 'Line 1a  Allowances from Worksheet A:                                          ________', 40, y, font, 10);
-  y -= 18;
-  addText(page, 'Line 1b  Allowances from Worksheet B (itemized deductions):                    ________', 40, y, font, 10);
-  y -= 18;
-  addText(page, 'Line 1c  Total allowances (add lines 1a and 1b):                               ________', 40, y, font, 10);
-  y -= 18;
-  addText(page, 'Line 2   Additional withholding per payroll period (if any):         $__________', 40, y, font, 10);
-  y -= 18;
-  addText(page, 'Line 3   Exempt from withholding? (see instructions):                          ________', 40, y, font, 10);
-  y -= 30;
+  const allow = d.de4Allowances || '1';
+  addText(page, `Line 1a  Allowances from Worksheet A:                                          ${allow}`, 40, y, font, 10); y -= 18;
+  addText(page, `Line 1b  Allowances from Worksheet B (itemized deductions):                    0`, 40, y, font, 10); y -= 18;
+  addText(page, `Line 1c  Total allowances (1a + 1b):                                           ${allow}`, 40, y, bold, 10); y -= 18;
+  addText(page, `Line 2   Additional withholding per payroll period:                  $${d.de4Extra||'0'}`, 40, y, font, 10); y -= 18;
+  addText(page, `Line 3   Exempt from CA withholding:                                            ${d.de4Exempt==='yes'?'YES':'No'}`, 40, y, font, 10); y -= 30;
 
   addText(page, 'CERTIFICATION', 40, y, bold, 10, rgb(0.91,0.45,0.04));
   y -= 16;

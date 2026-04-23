@@ -13,8 +13,8 @@
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#1a1a1a;color:#fff;padding:20px;max-width:640px;margin:0 auto;padding-bottom:80px}
     h1{text-align:center;font-size:20px;margin-bottom:4px}
     .sub{text-align:center;font-size:12px;color:#888;margin-bottom:20px}
-    .tab-bar{display:flex;gap:4px;margin-bottom:24px;background:#2a2a2a;border-radius:12px;padding:5px;overflow-x:auto}
-    .tab{flex:1;min-width:52px;padding:8px 4px;background:transparent;border:none;color:#888;font-size:11px;cursor:pointer;border-radius:8px;transition:all .2s;white-space:nowrap}
+    .tab-bar{display:flex;gap:3px;margin-bottom:24px;background:#2a2a2a;border-radius:12px;padding:5px;overflow-x:auto}
+    .tab{flex:1;min-width:46px;padding:7px 3px;background:transparent;border:none;color:#888;font-size:10px;cursor:pointer;border-radius:8px;transition:all .2s;white-space:nowrap;text-align:center}
     .tab.active{background:#e8730a;color:#fff;font-weight:700}
     .section{display:none}.section.active{display:block}
     .card{background:#2a2a2a;border-radius:12px;padding:16px;margin-bottom:16px}
@@ -23,6 +23,7 @@
     .field label{display:block;font-size:11px;color:#888;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
     .field input,.field select,.field textarea{width:100%;background:#1a1a1a;border:1px solid #3a3a3a;border-radius:8px;color:#fff;padding:10px 12px;font-size:15px;outline:none;transition:border-color .2s}
     .field input:focus,.field select:focus,.field textarea:focus{border-color:#e8730a}
+    .field input.err,.field select.err,.field textarea.err{border-color:#c0392b !important}
     .field select option{background:#2a2a2a}
     .field textarea{resize:vertical;min-height:70px}
     .row{display:flex;gap:10px}.row .field{flex:1}
@@ -30,9 +31,10 @@
     .check-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
     .check-tag{padding:6px 12px;background:#1a1a1a;border:1px solid #3a3a3a;border-radius:20px;font-size:13px;cursor:pointer;user-select:none;transition:all .15s}
     .check-tag.on{background:#e8730a;border-color:#e8730a;color:#fff;font-weight:600}
-    .radio-group{display:flex;gap:8px;margin-top:4px}
-    .radio-opt{flex:1;padding:10px;background:#1a1a1a;border:1px solid #3a3a3a;border-radius:8px;text-align:center;font-size:14px;cursor:pointer;transition:all .15s}
+    .radio-group{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap}
+    .radio-opt{flex:1;min-width:80px;padding:10px 6px;background:#1a1a1a;border:1px solid #3a3a3a;border-radius:8px;text-align:center;font-size:13px;cursor:pointer;transition:all .15s}
     .radio-opt.on{background:#e8730a;border-color:#e8730a;font-weight:700}
+    .radio-group.err .radio-opt:not(.on){border-color:#c0392b}
     .emp-block{border-top:1px solid #3a3a3a;padding-top:14px;margin-top:14px}
     .emp-block:first-of-type{border-top:none;padding-top:0;margin-top:0}
     .emp-num{font-size:11px;font-weight:700;color:#e8730a;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
@@ -43,12 +45,12 @@
     .btn-danger{background:#c0392b;color:#fff}
     .nav-btns{display:flex;gap:10px;margin-top:8px}
     .nav-btns .btn{margin-bottom:0}
-    .sig-box{background:#1a1a1a;border:1px solid #3a3a3a;border-radius:8px;padding:20px;text-align:center;color:#555;font-size:13px;margin-top:8px}
-    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#e8730a;color:#fff;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;display:none;z-index:999}
+    .alert{background:#3a1a1a;border:1px solid #c0392b;border-radius:8px;padding:12px;margin-bottom:14px;font-size:13px;color:#e74c3c;line-height:1.7;display:none}
+    .hint{font-size:11px;color:#666;margin-top:4px}
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#e8730a;color:#fff;padding:12px 24px;border-radius:10px;font-weight:700;font-size:14px;display:none;z-index:999;white-space:nowrap}
     .toast.err{background:#c0392b}
     .spinner{display:none;text-align:center;padding:20px;color:#888}
-    .required-star{color:#e8730a}
-    .field input.invalid{border-color:#c0392b}
+    .tax-note{background:#1e2a1e;border:1px solid #2a4a2a;border-radius:8px;padding:12px;font-size:12px;color:#8a8;line-height:1.6;margin-bottom:12px}
   </style>
 </head>
 <body>
@@ -62,76 +64,79 @@
   <button class="tab" onclick="goTab(2)">Employment</button>
   <button class="tab" onclick="goTab(3)">Experience</button>
   <button class="tab" onclick="goTab(4)">Emergency</button>
-  <button class="tab" onclick="goTab(5)">Submit</button>
+  <button class="tab" onclick="goTab(5)">Tax Info</button>
+  <button class="tab" onclick="goTab(6)">Submit</button>
 </div>
 
 <!-- ── 0 Personal ── -->
 <div class="section active" id="s0">
+  <div id="err0" class="alert"></div>
   <div class="card">
     <div class="card-title">Position</div>
-    <div class="field"><label>Applying For <span class="required-star">*</span></label><input id="position" type="text" placeholder="e.g. Class A Spreader Driver"></div>
-    <div class="field"><label>Date <span class="required-star">*</span></label><input id="appDate" type="date"></div>
+    <div class="field"><label>Applying For *</label><input id="position" type="text" placeholder="e.g. Class A Spreader Driver"></div>
+    <div class="field"><label>Application Date *</label><input id="appDate" type="date"></div>
   </div>
   <div class="card">
     <div class="card-title">Personal Info</div>
     <div class="row">
-      <div class="field"><label>First Name <span class="required-star">*</span></label><input id="firstName" type="text" autocomplete="given-name"></div>
-      <div class="field"><label>Last Name <span class="required-star">*</span></label><input id="lastName" type="text" autocomplete="family-name"></div>
+      <div class="field"><label>First Name *</label><input id="firstName" type="text" autocomplete="given-name"></div>
+      <div class="field"><label>Last Name *</label><input id="lastName" type="text" autocomplete="family-name"></div>
     </div>
     <div class="row">
-      <div class="field"><label>SSN <span class="required-star">*</span></label><input id="ssn" type="text" placeholder="000-00-0000" maxlength="11" inputmode="numeric"></div>
-      <div class="field"><label>Date of Birth <span class="required-star">*</span></label><input id="dob" type="date"></div>
+      <div class="field"><label>SSN *</label><input id="ssn" type="text" placeholder="000-00-0000" maxlength="11" inputmode="numeric"></div>
+      <div class="field"><label>Date of Birth *</label><input id="dob" type="date"></div>
     </div>
   </div>
   <div class="card">
     <div class="card-title">Contact</div>
-    <div class="field"><label>Street Address <span class="required-star">*</span></label><input id="street" type="text" autocomplete="street-address"></div>
+    <div class="field"><label>Street Address *</label><input id="street" type="text" autocomplete="street-address"></div>
     <div class="row">
-      <div class="field"><label>City <span class="required-star">*</span></label><input id="city" type="text"></div>
-      <div class="field narrow"><label>State <span class="required-star">*</span></label><input id="state" type="text" maxlength="2"></div>
-      <div class="field narrow"><label>ZIP <span class="required-star">*</span></label><input id="zip" type="text" inputmode="numeric" maxlength="5"></div>
+      <div class="field"><label>City *</label><input id="city" type="text"></div>
+      <div class="field narrow"><label>State *</label><input id="state" type="text" maxlength="2"></div>
+      <div class="field narrow"><label>ZIP *</label><input id="zip" type="text" inputmode="numeric" maxlength="5"></div>
     </div>
     <div class="row">
-      <div class="field"><label>Phone <span class="required-star">*</span></label><input id="phone" type="tel" autocomplete="tel"></div>
-      <div class="field"><label>Email <span class="required-star">*</span></label><input id="email" type="email" autocomplete="email"></div>
+      <div class="field"><label>Phone *</label><input id="phone" type="tel" autocomplete="tel"></div>
+      <div class="field"><label>Email *</label><input id="email" type="email" autocomplete="email"></div>
     </div>
     <div class="row">
-      <div class="field mid"><label>Years at Address</label><input id="yearsAddr" type="number" min="0" max="99"></div>
-      <div class="field"><label>Date Available</label><input id="dateAvail" type="date"></div>
+      <div class="field mid"><label>Years at Address *</label><input id="yearsAddr" type="number" min="0" max="99"></div>
+      <div class="field"><label>Date Available *</label><input id="dateAvail" type="date"></div>
     </div>
   </div>
   <div class="card">
     <div class="card-title">Eligibility</div>
-    <div class="field"><label>Legally eligible to work in the US? <span class="required-star">*</span></label>
-      <div class="radio-group">
+    <div class="field"><label>Legally eligible to work in the US? *</label>
+      <div class="radio-group" id="rg_eligible">
         <div class="radio-opt" id="eligible_yes" onclick="radio('eligible','yes')">Yes</div>
         <div class="radio-opt" id="eligible_no" onclick="radio('eligible','no')">No</div>
       </div>
     </div>
     <div class="field"><label>Worked here before?</label>
-      <div class="radio-group">
+      <div class="radio-group" id="rg_workedBefore">
         <div class="radio-opt" id="workedBefore_yes" onclick="radio('workedBefore','yes')">Yes</div>
         <div class="radio-opt" id="workedBefore_no" onclick="radio('workedBefore','no')">No</div>
       </div>
     </div>
-    <div class="field"><label>Pay Expected</label><input id="payExpected" type="text" placeholder="e.g. $45–$50/hr"></div>
+    <div class="field"><label>Pay Expected ($/hr) *</label><input id="payExpected" type="text" placeholder="e.g. 45-50/hr"></div>
   </div>
-  <div class="nav-btns"><button class="btn btn-primary" onclick="goTab(1)">Next: License →</button></div>
+  <div class="nav-btns"><button class="btn btn-primary" onclick="nextTab(0,1)">Next: License →</button></div>
 </div>
 
 <!-- ── 1 License ── -->
 <div class="section" id="s1">
+  <div id="err1" class="alert"></div>
   <div class="card">
     <div class="card-title">Driver's License</div>
     <div class="row">
-      <div class="field"><label>DL Number <span class="required-star">*</span></label><input id="dlNum" type="text"></div>
-      <div class="field narrow"><label>State <span class="required-star">*</span></label><input id="dlState" type="text" maxlength="2"></div>
+      <div class="field"><label>DL Number *</label><input id="dlNum" type="text"></div>
+      <div class="field narrow"><label>State *</label><input id="dlState" type="text" maxlength="2"></div>
     </div>
     <div class="row">
-      <div class="field narrow"><label>Class <span class="required-star">*</span></label>
+      <div class="field narrow"><label>Class *</label>
         <select id="dlClass"><option value="">—</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select>
       </div>
-      <div class="field"><label>Expiry <span class="required-star">*</span></label><input id="dlExp" type="date"></div>
+      <div class="field"><label>Expiry *</label><input id="dlExp" type="date"></div>
     </div>
     <div class="field"><label>Endorsements</label>
       <div class="check-group" id="endorsements">
@@ -146,51 +151,54 @@
   </div>
   <div class="card">
     <div class="card-title">Compliance</div>
-    <div class="field"><label>DL ever denied, suspended, or revoked?</label>
-      <div class="radio-group">
+    <div class="field"><label>DL ever denied, suspended, or revoked? *</label>
+      <div class="radio-group" id="rg_dlIssue">
         <div class="radio-opt" id="dlIssue_yes" onclick="radio('dlIssue','yes')">Yes</div>
         <div class="radio-opt" id="dlIssue_no" onclick="radio('dlIssue','no')">No</div>
       </div>
     </div>
-    <div class="field"><label>CDL violations in last 12 months?</label>
-      <div class="radio-group">
+    <div class="field"><label>CDL violations in last 12 months? *</label>
+      <div class="radio-group" id="rg_cdlViol">
         <div class="radio-opt" id="cdlViol_yes" onclick="radio('cdlViol','yes')">Yes</div>
         <div class="radio-opt" id="cdlViol_no" onclick="radio('cdlViol','no')">No</div>
       </div>
     </div>
-    <div class="field"><label>States Operated In</label><input id="statesOp" type="text" placeholder="e.g. CA, OR, WA"></div>
+    <div class="field"><label>States Operated In *</label><input id="statesOp" type="text" placeholder="e.g. CA, OR, WA"></div>
   </div>
   <div class="nav-btns">
     <button class="btn btn-secondary" onclick="goTab(0)">← Back</button>
-    <button class="btn btn-primary" onclick="goTab(2)">Next: Employment →</button>
+    <button class="btn btn-primary" onclick="nextTab(1,2)">Next: Employment →</button>
   </div>
 </div>
 
 <!-- ── 2 Employment ── -->
 <div class="section" id="s2">
+  <div id="err2" class="alert"></div>
   <div class="card">
     <div class="card-title">Employment History — Most Recent First</div>
+    <p class="hint" style="margin-bottom:14px">Must cover last 3 years minimum. Add all employers back 3+ years.</p>
+
     <div class="emp-block">
-      <div class="emp-num">Employer 1 <span class="required-star">*</span></div>
-      <div class="field"><label>Company Name</label><input id="e1name" type="text"></div>
-      <div class="field"><label>Address</label><input id="e1addr" type="text"></div>
+      <div class="emp-num">Employer 1 (Most Recent) *</div>
+      <div class="field"><label>Company Name *</label><input id="e1name" type="text"></div>
+      <div class="field"><label>Address *</label><input id="e1addr" type="text"></div>
       <div class="row">
-        <div class="field"><label>City</label><input id="e1city" type="text"></div>
-        <div class="field narrow"><label>State</label><input id="e1state" type="text" maxlength="2"></div>
-        <div class="field narrow"><label>ZIP</label><input id="e1zip" type="text" inputmode="numeric" maxlength="5"></div>
+        <div class="field"><label>City *</label><input id="e1city" type="text"></div>
+        <div class="field narrow"><label>State *</label><input id="e1state" type="text" maxlength="2"></div>
+        <div class="field narrow"><label>ZIP *</label><input id="e1zip" type="text" inputmode="numeric" maxlength="5"></div>
       </div>
       <div class="row">
-        <div class="field"><label>Phone</label><input id="e1phone" type="tel"></div>
-        <div class="field"><label>Supervisor</label><input id="e1supervisor" type="text"></div>
+        <div class="field"><label>Phone *</label><input id="e1phone" type="tel"></div>
+        <div class="field"><label>Supervisor *</label><input id="e1supervisor" type="text"></div>
       </div>
-      <div class="field"><label>Position / Title</label><input id="e1title" type="text"></div>
+      <div class="field"><label>Position / Title *</label><input id="e1title" type="text"></div>
       <div class="row">
-        <div class="field"><label>From (MM/YYYY)</label><input id="e1from" type="text" placeholder="04/2024" maxlength="7"></div>
-        <div class="field"><label>To (MM/YYYY)</label><input id="e1to" type="text" placeholder="10/2025" maxlength="7"></div>
+        <div class="field"><label>From (MM/YYYY) *</label><input id="e1from" type="text" placeholder="04/2024" maxlength="7"></div>
+        <div class="field"><label>To (MM/YYYY) *</label><input id="e1to" type="text" placeholder="10/2025" maxlength="7"></div>
       </div>
-      <div class="field"><label>Reason for Leaving</label><input id="e1reason" type="text"></div>
-      <div class="field"><label>May we contact?</label>
-        <div class="radio-group">
+      <div class="field"><label>Reason for Leaving *</label><input id="e1reason" type="text"></div>
+      <div class="field"><label>May we contact? *</label>
+        <div class="radio-group" id="rg_e1mayContact">
           <div class="radio-opt" id="e1mayContact_yes" onclick="radio('e1mayContact','yes')">Yes</div>
           <div class="radio-opt" id="e1mayContact_no" onclick="radio('e1mayContact','no')">No</div>
         </div>
@@ -217,7 +225,7 @@
       </div>
       <div class="field"><label>Reason for Leaving</label><input id="e2reason" type="text"></div>
       <div class="field"><label>May we contact?</label>
-        <div class="radio-group">
+        <div class="radio-group" id="rg_e2mayContact">
           <div class="radio-opt" id="e2mayContact_yes" onclick="radio('e2mayContact','yes')">Yes</div>
           <div class="radio-opt" id="e2mayContact_no" onclick="radio('e2mayContact','no')">No</div>
         </div>
@@ -244,7 +252,7 @@
       </div>
       <div class="field"><label>Reason for Leaving</label><input id="e3reason" type="text"></div>
       <div class="field"><label>May we contact?</label>
-        <div class="radio-group">
+        <div class="radio-group" id="rg_e3mayContact">
           <div class="radio-opt" id="e3mayContact_yes" onclick="radio('e3mayContact','yes')">Yes</div>
           <div class="radio-opt" id="e3mayContact_no" onclick="radio('e3mayContact','no')">No</div>
         </div>
@@ -253,15 +261,16 @@
   </div>
   <div class="nav-btns">
     <button class="btn btn-secondary" onclick="goTab(1)">← Back</button>
-    <button class="btn btn-primary" onclick="goTab(3)">Next: Experience →</button>
+    <button class="btn btn-primary" onclick="nextTab(2,3)">Next: Experience →</button>
   </div>
 </div>
 
 <!-- ── 3 Experience ── -->
 <div class="section" id="s3">
+  <div id="err3" class="alert"></div>
   <div class="card">
     <div class="card-title">Equipment Operated</div>
-    <div class="field"><label>Vehicle Types</label>
+    <div class="field"><label>Vehicle Types * (select all that apply)</label>
       <div class="check-group" id="vehicles">
         <div class="check-tag" data-val="Tractor Semi-Trailer" onclick="toggleTag(this)">Tractor Semi-Trailer</div>
         <div class="check-tag" data-val="Straight Truck" onclick="toggleTag(this)">Straight Truck</div>
@@ -273,14 +282,14 @@
       </div>
     </div>
     <div class="row">
-      <div class="field"><label>Approx Miles (3 yrs)</label><input id="miles" type="text" placeholder="e.g. ~200,000"></div>
-      <div class="field mid"><label>Years CDL Experience</label><input id="yearsExp" type="number" min="0" max="50"></div>
+      <div class="field"><label>Approx Miles (3 yrs) *</label><input id="miles" type="text" placeholder="e.g. 200,000"></div>
+      <div class="field mid"><label>Years CDL Experience *</label><input id="yearsExp" type="number" min="0" max="50"></div>
     </div>
   </div>
   <div class="card">
     <div class="card-title">Accident History — Last 3 Years</div>
-    <div class="field"><label>Any accidents?</label>
-      <div class="radio-group">
+    <div class="field"><label>Any accidents? *</label>
+      <div class="radio-group" id="rg_accidents">
         <div class="radio-opt" id="accidents_none" onclick="radio('accidents','none')">None</div>
         <div class="radio-opt" id="accidents_yes" onclick="radio('accidents','yes')">Yes</div>
       </div>
@@ -289,8 +298,8 @@
   </div>
   <div class="card">
     <div class="card-title">Traffic Violations — Last 3 Years</div>
-    <div class="field"><label>Any violations?</label>
-      <div class="radio-group">
+    <div class="field"><label>Any violations? *</label>
+      <div class="radio-group" id="rg_violations">
         <div class="radio-opt" id="violations_none" onclick="radio('violations','none')">None</div>
         <div class="radio-opt" id="violations_yes" onclick="radio('violations','yes')">Yes</div>
       </div>
@@ -299,14 +308,14 @@
   </div>
   <div class="card">
     <div class="card-title">Drug &amp; Alcohol</div>
-    <div class="field"><label>Ever tested positive for controlled substance or alcohol?</label>
-      <div class="radio-group">
+    <div class="field"><label>Ever tested positive for controlled substance or alcohol? *</label>
+      <div class="radio-group" id="rg_drugTest">
         <div class="radio-opt" id="drugTest_no" onclick="radio('drugTest','no')">No</div>
         <div class="radio-opt" id="drugTest_yes" onclick="radio('drugTest','yes')">Yes</div>
       </div>
     </div>
-    <div class="field"><label>Ever refused a required test?</label>
-      <div class="radio-group">
+    <div class="field"><label>Ever refused a required test? *</label>
+      <div class="radio-group" id="rg_refusedTest">
         <div class="radio-opt" id="refusedTest_no" onclick="radio('refusedTest','no')">No</div>
         <div class="radio-opt" id="refusedTest_yes" onclick="radio('refusedTest','yes')">Yes</div>
       </div>
@@ -314,46 +323,100 @@
   </div>
   <div class="nav-btns">
     <button class="btn btn-secondary" onclick="goTab(2)">← Back</button>
-    <button class="btn btn-primary" onclick="goTab(4)">Next: Emergency →</button>
+    <button class="btn btn-primary" onclick="nextTab(3,4)">Next: Emergency →</button>
   </div>
 </div>
 
 <!-- ── 4 Emergency ── -->
 <div class="section" id="s4">
+  <div id="err4" class="alert"></div>
   <div class="card">
     <div class="card-title">Emergency Contact</div>
-    <div class="field"><label>Full Name <span class="required-star">*</span></label><input id="ecName" type="text"></div>
-    <div class="field"><label>Relationship <span class="required-star">*</span></label><input id="ecRel" type="text" placeholder="e.g. Wife, Parent, Sibling"></div>
-    <div class="field"><label>Phone <span class="required-star">*</span></label><input id="ecPhone" type="tel"></div>
+    <div class="field"><label>Full Name *</label><input id="ecName" type="text"></div>
+    <div class="field"><label>Relationship *</label><input id="ecRel" type="text" placeholder="e.g. Wife, Parent, Sibling"></div>
+    <div class="field"><label>Phone *</label><input id="ecPhone" type="tel"></div>
   </div>
   <div class="card">
     <div class="card-title">Certification</div>
     <p style="font-size:13px;color:#aaa;line-height:1.6;">I certify that all information provided is true and complete. I understand that false statements may result in refusal of employment or discharge. I authorize investigation of all statements herein.</p>
-    <div class="field" style="margin-top:14px"><label>Applicant Full Name (typed = signature)</label><input id="sigName" type="text" placeholder="Type your full name"></div>
-    <div class="field"><label>Date</label><input id="sigDate" type="date"></div>
+    <div class="field" style="margin-top:14px"><label>Type Full Name to Sign *</label><input id="sigName" type="text" placeholder="Full legal name"></div>
+    <div class="field"><label>Date *</label><input id="sigDate" type="date"></div>
   </div>
   <div class="nav-btns">
     <button class="btn btn-secondary" onclick="goTab(3)">← Back</button>
-    <button class="btn btn-primary" onclick="goTab(5)">Next: Submit →</button>
+    <button class="btn btn-primary" onclick="nextTab(4,5)">Next: Tax Info →</button>
   </div>
 </div>
 
-<!-- ── 5 Submit ── -->
+<!-- ── 5 Tax Info ── -->
 <div class="section" id="s5">
+  <div id="err5" class="alert"></div>
+
+  <div class="card">
+    <div class="card-title">Federal W-4</div>
+    <div class="tax-note">This information determines your federal tax withholding. If unsure, use the IRS withholding estimator at irs.gov/w4app.</div>
+    <div class="field"><label>Filing Status *</label>
+      <select id="w4FilingStatus">
+        <option value="">— Select —</option>
+        <option value="Single or Married Filing Separately">Single or Married Filing Separately</option>
+        <option value="Married Filing Jointly">Married Filing Jointly (or Qualifying Surviving Spouse)</option>
+        <option value="Head of Household">Head of Household</option>
+      </select>
+    </div>
+    <div class="field"><label>Step 2 — Multiple jobs or spouse works?</label>
+      <div class="radio-group" id="rg_w4MultiJob">
+        <div class="radio-opt" id="w4MultiJob_yes" onclick="radio('w4MultiJob','yes')">Yes — check box (c)</div>
+        <div class="radio-opt" id="w4MultiJob_no" onclick="radio('w4MultiJob','no')">No</div>
+      </div>
+      <p class="hint">Check Yes if you and your spouse both work, or you have two jobs.</p>
+    </div>
+    <div class="field"><label>Step 3 — Children under 17 (count)</label><input id="w4Children" type="number" min="0" max="20" placeholder="0"></div>
+    <div class="field"><label>Step 3 — Other dependents (count)</label><input id="w4OtherDep" type="number" min="0" max="20" placeholder="0"></div>
+    <div class="field"><label>Step 4a — Other income not from jobs ($/yr)</label><input id="w4OtherIncome" type="text" placeholder="0"></div>
+    <div class="field"><label>Step 4b — Deductions (from IRS worksheet, $/yr)</label><input id="w4Deductions" type="text" placeholder="0"></div>
+    <div class="field"><label>Step 4c — Extra withholding per pay period ($)</label><input id="w4Extra" type="text" placeholder="0"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">California DE-4</div>
+    <div class="tax-note">California state withholding. If different from federal, complete separately. See edd.ca.gov for worksheets.</div>
+    <div class="field"><label>CA Filing Status *</label>
+      <select id="de4FilingStatus">
+        <option value="">— Select —</option>
+        <option value="Single">Single</option>
+        <option value="Married (spouse does not work)">Married — spouse does not work</option>
+        <option value="Married (two incomes — withhold as Single)">Married — two incomes (withhold as Single)</option>
+        <option value="Head of Household">Head of Household</option>
+      </select>
+    </div>
+    <div class="field"><label>Allowances — Line 1a (from Worksheet A)</label><input id="de4Allowances" type="number" min="0" max="99" placeholder="1"></div>
+    <div class="field"><label>Additional withholding per pay period ($)</label><input id="de4Extra" type="text" placeholder="0"></div>
+    <div class="field"><label>Exempt from CA withholding?</label>
+      <div class="radio-group" id="rg_de4Exempt">
+        <div class="radio-opt" id="de4Exempt_no" onclick="radio('de4Exempt','no')">No</div>
+        <div class="radio-opt" id="de4Exempt_yes" onclick="radio('de4Exempt','yes')">Yes</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn btn-secondary" onclick="goTab(4)">← Back</button>
+    <button class="btn btn-primary" onclick="nextTab(5,6)">Next: Submit →</button>
+  </div>
+</div>
+
+<!-- ── 6 Submit ── -->
+<div class="section" id="s6">
   <div class="card">
     <div class="card-title">Ready to Submit</div>
-    <p style="font-size:14px;color:#aaa;line-height:1.6;margin-bottom:16px;">
-      Submitting will generate your complete driver application package and email it to Pale Horse Asphalt HR. Make sure all required fields are filled before submitting.
-    </p>
-    <div id="validationErrors" style="display:none;background:#3a1a1a;border:1px solid #c0392b;border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;color:#e74c3c;line-height:1.8"></div>
-    <div class="spinner" id="spinner">⏳ Generating PDF and sending...</div>
+    <p style="font-size:14px;color:#aaa;line-height:1.6;margin-bottom:16px;">Submitting will generate your complete driver file (Application + W-4 + DE-4 + I-9) and email it to Pale Horse Asphalt HR.</p>
+    <div id="validationErrors" class="alert"></div>
+    <div class="spinner" id="spinner">Generating PDF and sending...</div>
     <button class="btn btn-primary" id="submitBtn" onclick="submitApp()">📤 Submit Application</button>
     <button class="btn btn-secondary" onclick="saveData()">💾 Save Progress</button>
     <button class="btn btn-danger" onclick="clearData()">🗑 Clear All</button>
   </div>
-  <div class="nav-btns">
-    <button class="btn btn-secondary" onclick="goTab(4)">← Back</button>
-  </div>
+  <div class="nav-btns"><button class="btn btn-secondary" onclick="goTab(5)">← Back</button></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -369,194 +432,184 @@ function goTab(n) {
 
 function radio(name, val) {
   state[name] = val;
-  document.querySelectorAll(`[id^="${name}_"]`).forEach(el => {
-    el.classList.toggle('on', el.id === `${name}_${val}`);
-  });
+  document.querySelectorAll(`[id^="${name}_"]`).forEach(el => el.classList.toggle('on', el.id===`${name}_${val}`));
 }
 
 function toggleTag(el) { el.classList.toggle('on'); }
+function getChecked(gid) { return [...document.querySelectorAll(`#${gid} .check-tag.on`)].map(e=>e.dataset.val); }
+function v(id) { const e=document.getElementById(id); return e?e.value.trim():''; }
+function fmt(d) { if(!d)return''; const[y,m,dd]=d.split('-'); return dd?`${m}/${dd}/${y}`:d; }
 
-function getChecked(groupId) {
-  return [...document.querySelectorAll(`#${groupId} .check-tag.on`)].map(e => e.dataset.val);
+function markErr(id) { const e=document.getElementById(id); if(e){e.classList.add('err'); return true;} return false; }
+function clearErrs() { document.querySelectorAll('.err').forEach(e=>e.classList.remove('err')); }
+
+function parseEmployDate(s) {
+  if (!s || s.length < 7) return null;
+  const parts = s.split('/');
+  if (parts.length < 2) return null;
+  const m = parseInt(parts[0]), y = parseInt(parts[1]);
+  if (isNaN(m)||isNaN(y)) return null;
+  return new Date(y, m-1, 1);
 }
 
-function v(id) {
-  const el = document.getElementById(id);
-  return el ? el.value.trim() : '';
+function checkEmployment3Years() {
+  const froms = ['e1from','e2from','e3from'].map(id=>parseEmployDate(v(id))).filter(Boolean);
+  if (!froms.length) return false;
+  const earliest = new Date(Math.min(...froms.map(d=>d.getTime())));
+  const threeYearsAgo = new Date();
+  threeYearsAgo.setFullYear(threeYearsAgo.getFullYear()-3);
+  return earliest <= threeYearsAgo;
 }
 
-function fmt(dateStr) {
-  if (!dateStr) return '';
-  const [y,m,d] = dateStr.split('-');
-  return d ? `${m}/${d}/${y}` : dateStr;
-}
+const tabRules = {
+  0: () => {
+    const errs=[];
+    const required=[['position','Position'],['appDate','Application Date'],['firstName','First Name'],['lastName','Last Name'],['ssn','SSN'],['dob','Date of Birth'],['street','Street Address'],['city','City'],['state','State'],['zip','ZIP'],['phone','Phone'],['email','Email'],['yearsAddr','Years at Address'],['dateAvail','Date Available'],['payExpected','Pay Expected']];
+    required.forEach(([id,lbl])=>{ if(!v(id)){markErr(id);errs.push(lbl+' is required');} });
+    if(!state.eligible){document.getElementById('rg_eligible').classList.add('err');errs.push('Work eligibility is required');}
+    return errs;
+  },
+  1: () => {
+    const errs=[];
+    [['dlNum','DL Number'],['dlState','DL State'],['dlClass','DL Class'],['dlExp','DL Expiry'],['statesOp','States Operated']].forEach(([id,lbl])=>{ if(!v(id)){markErr(id);errs.push(lbl+' is required');} });
+    if(!state.dlIssue){document.getElementById('rg_dlIssue').classList.add('err');errs.push('DL suspension question required');}
+    if(!state.cdlViol){document.getElementById('rg_cdlViol').classList.add('err');errs.push('CDL violations question required');}
+    return errs;
+  },
+  2: () => {
+    const errs=[];
+    [['e1name','Employer 1 Name'],['e1addr','Employer 1 Address'],['e1city','Employer 1 City'],['e1state','Employer 1 State'],['e1zip','Employer 1 ZIP'],['e1phone','Employer 1 Phone'],['e1supervisor','Employer 1 Supervisor'],['e1title','Employer 1 Position'],['e1from','Employer 1 From'],['e1to','Employer 1 To'],['e1reason','Employer 1 Reason Left']].forEach(([id,lbl])=>{ if(!v(id)){markErr(id);errs.push(lbl+' is required');} });
+    if(!state.e1mayContact){document.getElementById('rg_e1mayContact').classList.add('err');errs.push('Employer 1 contact permission required');}
+    if(!checkEmployment3Years()) errs.push('Employment history must cover the last 3 years. Add more employers.');
+    return errs;
+  },
+  3: () => {
+    const errs=[];
+    [['miles','Approx Miles'],['yearsExp','Years CDL Experience']].forEach(([id,lbl])=>{ if(!v(id)){markErr(id);errs.push(lbl+' is required');} });
+    if(!getChecked('vehicles').length) errs.push('Select at least one vehicle type.');
+    if(!state.accidents){document.getElementById('rg_accidents').classList.add('err');errs.push('Accident history required');}
+    if(!state.violations){document.getElementById('rg_violations').classList.add('err');errs.push('Violation history required');}
+    if(!state.drugTest){document.getElementById('rg_drugTest').classList.add('err');errs.push('Drug/alcohol test question required');}
+    if(!state.refusedTest){document.getElementById('rg_refusedTest').classList.add('err');errs.push('Test refusal question required');}
+    return errs;
+  },
+  4: () => {
+    const errs=[];
+    [['ecName','Emergency Contact Name'],['ecRel','Emergency Contact Relationship'],['ecPhone','Emergency Contact Phone'],['sigName','Signature (typed name)'],['sigDate','Signature Date']].forEach(([id,lbl])=>{ if(!v(id)){markErr(id);errs.push(lbl+' is required');} });
+    return errs;
+  },
+  5: () => {
+    const errs=[];
+    if(!v('w4FilingStatus')){markErr('w4FilingStatus');errs.push('Federal W-4 filing status required');}
+    if(!v('de4FilingStatus')){markErr('de4FilingStatus');errs.push('CA DE-4 filing status required');}
+    return errs;
+  },
+};
 
-function showToast(msg, err=false) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast' + (err ? ' err' : '');
-  t.style.display = 'block';
-  setTimeout(() => t.style.display = 'none', 4000);
-}
-
-function validate() {
-  const required = [
-    ['position','Position / Job Title'],
-    ['appDate','Application Date'],
-    ['firstName','First Name'],
-    ['lastName','Last Name'],
-    ['ssn','SSN'],
-    ['dob','Date of Birth'],
-    ['street','Street Address'],
-    ['city','City'],
-    ['state','State'],
-    ['zip','ZIP'],
-    ['phone','Phone'],
-    ['email','Email'],
-    ['dlNum','DL Number'],
-    ['dlState','DL State'],
-    ['dlClass','DL Class'],
-    ['dlExp','DL Expiry'],
-    ['e1name','Employer 1 Company Name'],
-    ['ecName','Emergency Contact Name'],
-    ['ecRel','Emergency Contact Relationship'],
-    ['ecPhone','Emergency Contact Phone'],
-    ['sigName','Signature (typed name)'],
-  ];
-  const errors = [];
-  if (!state.eligible) errors.push('Work eligibility answer required');
-  required.forEach(([id, label]) => {
-    if (!v(id)) errors.push(`${label} is required`);
-  });
-  return errors;
+function nextTab(from, to) {
+  clearErrs();
+  const errs = tabRules[from] ? tabRules[from]() : [];
+  const errDiv = document.getElementById(`err${from}`);
+  if (errs.length) {
+    errDiv.innerHTML = '<strong>Please fix before continuing:</strong><br>' + errs.join('<br>');
+    errDiv.style.display = 'block';
+    window.scrollTo(0,0);
+    return;
+  }
+  errDiv.style.display = 'none';
+  goTab(to);
 }
 
 function collectData() {
   return {
-    position: v('position'), appDate: fmt(v('appDate')),
-    firstName: v('firstName'), lastName: v('lastName'),
-    ssn: v('ssn'), dob: fmt(v('dob')),
-    street: v('street'), city: v('city'), state: v('state'), zip: v('zip'),
-    phone: v('phone'), email: v('email'),
-    yearsAddr: v('yearsAddr'), dateAvail: fmt(v('dateAvail')),
-    payExpected: v('payExpected'),
-    eligible: state.eligible || '', workedBefore: state.workedBefore || '',
-    dlNum: v('dlNum'), dlState: v('dlState'), dlClass: v('dlClass'),
-    dlExp: fmt(v('dlExp')), endorsements: getChecked('endorsements').join(', '),
-    dlIssue: state.dlIssue || '', cdlViol: state.cdlViol || '',
-    statesOp: v('statesOp'),
-    e1name: v('e1name'), e1addr: v('e1addr'), e1city: v('e1city'),
-    e1state: v('e1state'), e1zip: v('e1zip'), e1phone: v('e1phone'),
-    e1supervisor: v('e1supervisor'), e1title: v('e1title'),
-    e1from: v('e1from'), e1to: v('e1to'), e1reason: v('e1reason'),
-    e1mayContact: state.e1mayContact || '',
-    e2name: v('e2name'), e2addr: v('e2addr'), e2city: v('e2city'),
-    e2state: v('e2state'), e2zip: v('e2zip'), e2phone: v('e2phone'),
-    e2supervisor: v('e2supervisor'), e2title: v('e2title'),
-    e2from: v('e2from'), e2to: v('e2to'), e2reason: v('e2reason'),
-    e2mayContact: state.e2mayContact || '',
-    e3name: v('e3name'), e3addr: v('e3addr'), e3city: v('e3city'),
-    e3state: v('e3state'), e3zip: v('e3zip'), e3phone: v('e3phone'),
-    e3supervisor: v('e3supervisor'), e3title: v('e3title'),
-    e3from: v('e3from'), e3to: v('e3to'), e3reason: v('e3reason'),
-    e3mayContact: state.e3mayContact || '',
-    vehicles: getChecked('vehicles').join(', '),
-    miles: v('miles'), yearsExp: v('yearsExp'),
-    accidents: state.accidents || '', accidentDetails: v('accidentDetails'),
-    violations: state.violations || '', violationDetails: v('violationDetails'),
-    drugTest: state.drugTest || '', refusedTest: state.refusedTest || '',
-    ecName: v('ecName'), ecRel: v('ecRel'), ecPhone: v('ecPhone'),
-    sigName: v('sigName'), sigDate: fmt(v('sigDate')),
+    position:v('position'), appDate:fmt(v('appDate')),
+    firstName:v('firstName'), lastName:v('lastName'),
+    ssn:v('ssn'), dob:fmt(v('dob')),
+    street:v('street'), city:v('city'), state:v('state'), zip:v('zip'),
+    phone:v('phone'), email:v('email'),
+    yearsAddr:v('yearsAddr'), dateAvail:fmt(v('dateAvail')),
+    payExpected:v('payExpected'),
+    eligible:state.eligible||'', workedBefore:state.workedBefore||'',
+    dlNum:v('dlNum'), dlState:v('dlState'), dlClass:v('dlClass'),
+    dlExp:fmt(v('dlExp')), endorsements:getChecked('endorsements').join(', '),
+    dlIssue:state.dlIssue||'', cdlViol:state.cdlViol||'', statesOp:v('statesOp'),
+    e1name:v('e1name'), e1addr:v('e1addr'), e1city:v('e1city'), e1state:v('e1state'), e1zip:v('e1zip'),
+    e1phone:v('e1phone'), e1supervisor:v('e1supervisor'), e1title:v('e1title'),
+    e1from:v('e1from'), e1to:v('e1to'), e1reason:v('e1reason'), e1mayContact:state.e1mayContact||'',
+    e2name:v('e2name'), e2addr:v('e2addr'), e2city:v('e2city'), e2state:v('e2state'), e2zip:v('e2zip'),
+    e2phone:v('e2phone'), e2supervisor:v('e2supervisor'), e2title:v('e2title'),
+    e2from:v('e2from'), e2to:v('e2to'), e2reason:v('e2reason'), e2mayContact:state.e2mayContact||'',
+    e3name:v('e3name'), e3addr:v('e3addr'), e3city:v('e3city'), e3state:v('e3state'), e3zip:v('e3zip'),
+    e3phone:v('e3phone'), e3supervisor:v('e3supervisor'), e3title:v('e3title'),
+    e3from:v('e3from'), e3to:v('e3to'), e3reason:v('e3reason'), e3mayContact:state.e3mayContact||'',
+    vehicles:getChecked('vehicles').join(', '), miles:v('miles'), yearsExp:v('yearsExp'),
+    accidents:state.accidents||'', accidentDetails:v('accidentDetails'),
+    violations:state.violations||'', violationDetails:v('violationDetails'),
+    drugTest:state.drugTest||'', refusedTest:state.refusedTest||'',
+    ecName:v('ecName'), ecRel:v('ecRel'), ecPhone:v('ecPhone'),
+    sigName:v('sigName'), sigDate:fmt(v('sigDate')),
+    w4FilingStatus:v('w4FilingStatus'), w4MultiJob:state.w4MultiJob||'no',
+    w4Children:v('w4Children')||'0', w4OtherDep:v('w4OtherDep')||'0',
+    w4OtherIncome:v('w4OtherIncome')||'0', w4Deductions:v('w4Deductions')||'0', w4Extra:v('w4Extra')||'0',
+    de4FilingStatus:v('de4FilingStatus'), de4Allowances:v('de4Allowances')||'1',
+    de4Extra:v('de4Extra')||'0', de4Exempt:state.de4Exempt||'no',
   };
 }
 
+function showToast(msg,err=false){const t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(err?' err':'');t.style.display='block';setTimeout(()=>t.style.display='none',4000);}
+
 async function submitApp() {
-  const errors = validate();
-  const errDiv = document.getElementById('validationErrors');
-  if (errors.length) {
-    errDiv.innerHTML = '<strong>Please fix before submitting:</strong><br>' + errors.join('<br>');
-    errDiv.style.display = 'block';
-    return;
-  }
-  errDiv.style.display = 'none';
-
-  const btn = document.getElementById('submitBtn');
-  const spinner = document.getElementById('spinner');
-  btn.disabled = true;
-  btn.style.opacity = '0.5';
-  spinner.style.display = 'block';
-
+  const btn=document.getElementById('submitBtn');
+  const spinner=document.getElementById('spinner');
+  btn.disabled=true; btn.style.opacity='0.5'; spinner.style.display='block';
   try {
-    const res = await fetch('/api/submit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(collectData()),
-    });
+    const res = await fetch('/api/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(collectData())});
     const json = await res.json();
-    if (res.ok) {
-      spinner.style.display = 'none';
-      showToast('✅ Application submitted! HR will be in touch.');
-      localStorage.removeItem('driverApp');
-    } else {
-      throw new Error(json.error || 'Server error');
-    }
+    if(res.ok){spinner.style.display='none';showToast('Application submitted! HR will be in touch.');localStorage.removeItem('driverApp');}
+    else throw new Error(json.error||'Server error');
   } catch(e) {
-    spinner.style.display = 'none';
-    btn.disabled = false;
-    btn.style.opacity = '1';
-    showToast('❌ ' + e.message, true);
+    spinner.style.display='none'; btn.disabled=false; btn.style.opacity='1';
+    showToast('Error: '+e.message,true);
   }
 }
 
-function saveData() {
-  const inputs = {};
-  document.querySelectorAll('input,select,textarea').forEach(el => { if(el.id) inputs[el.id] = el.value; });
-  const tags = {};
-  document.querySelectorAll('.check-group').forEach(g => {
-    tags[g.id] = [...g.querySelectorAll('.check-tag.on')].map(t => t.dataset.val);
-  });
-  localStorage.setItem('driverApp', JSON.stringify({ inputs, tags, radios: state }));
-  showToast('💾 Saved!');
+function saveData(){
+  const inputs={};
+  document.querySelectorAll('input,select,textarea').forEach(el=>{if(el.id)inputs[el.id]=el.value;});
+  const tags={};
+  document.querySelectorAll('.check-group').forEach(g=>{tags[g.id]=[...g.querySelectorAll('.check-tag.on')].map(t=>t.dataset.val);});
+  localStorage.setItem('driverApp',JSON.stringify({inputs,tags,radios:state}));
+  showToast('Saved!');
 }
 
-function loadData() {
-  const raw = localStorage.getItem('driverApp');
-  if (!raw) return;
-  try {
-    const { inputs, tags, radios } = JSON.parse(raw);
-    Object.entries(inputs).forEach(([id, val]) => { const el = document.getElementById(id); if(el) el.value = val; });
-    Object.entries(tags).forEach(([gid, vals]) => {
-      document.querySelectorAll(`#${gid} .check-tag`).forEach(tag => tag.classList.toggle('on', vals.includes(tag.dataset.val)));
-    });
-    Object.entries(radios).forEach(([name, val]) => radio(name, val));
-  } catch(e) {}
+function loadData(){
+  const raw=localStorage.getItem('driverApp'); if(!raw)return;
+  try{
+    const{inputs,tags,radios}=JSON.parse(raw);
+    Object.entries(inputs).forEach(([id,val])=>{const e=document.getElementById(id);if(e)e.value=val;});
+    Object.entries(tags).forEach(([gid,vals])=>{document.querySelectorAll(`#${gid} .check-tag`).forEach(t=>t.classList.toggle('on',vals.includes(t.dataset.val)));});
+    Object.entries(radios).forEach(([name,val])=>radio(name,val));
+  }catch(e){}
 }
 
-function clearData() {
-  if (!confirm('Clear all fields?')) return;
+function clearData(){
+  if(!confirm('Clear all fields?'))return;
   localStorage.removeItem('driverApp');
-  document.querySelectorAll('input,select,textarea').forEach(el => el.value = '');
-  document.querySelectorAll('.check-tag,.radio-opt').forEach(el => el.classList.remove('on'));
-  state = {};
-  goTab(0);
+  document.querySelectorAll('input,select,textarea').forEach(el=>el.value='');
+  document.querySelectorAll('.check-tag,.radio-opt').forEach(el=>el.classList.remove('on'));
+  state={};goTab(0);
 }
 
-// SSN auto-format
-document.getElementById('ssn').addEventListener('input', function() {
-  let val = this.value.replace(/\D/g,'');
-  if (val.length > 3) val = val.slice(0,3)+'-'+val.slice(3);
-  if (val.length > 7) val = val.slice(0,7)+'-'+val.slice(7,11);
-  this.value = val;
+document.getElementById('ssn').addEventListener('input',function(){
+  let val=this.value.replace(/\D/g,'');
+  if(val.length>3)val=val.slice(0,3)+'-'+val.slice(3);
+  if(val.length>7)val=val.slice(0,7)+'-'+val.slice(7,11);
+  this.value=val;
 });
-
-// Auto-uppercase state fields
-document.querySelectorAll('[maxlength="2"]').forEach(el => {
-  el.addEventListener('input', function() { this.value = this.value.toUpperCase(); });
-});
+document.querySelectorAll('[maxlength="2"]').forEach(el=>el.addEventListener('input',function(){this.value=this.value.toUpperCase();}));
 
 loadData();
-
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
 </script>
 </body>
 </html>

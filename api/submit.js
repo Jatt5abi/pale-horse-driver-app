@@ -529,7 +529,7 @@ async function buildIDPage(d) {
   const doc = await PDFDocument.create();
   const font = await doc.embedFont(StandardFonts.Helvetica);
   const bold = await doc.embedFont(StandardFonts.HelveticaBold);
-  const page = doc.addPage([612, 792]);
+  let page = doc.addPage([612, 792]);
   const W = 612;
   let y = 760;
 

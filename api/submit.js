@@ -153,16 +153,29 @@ async function buildApplicationPDF(d) {
   y -= 8;
 
   // Certification
+  if (y < 160) { page = doc.addPage([612,792]); y = 750; }
   y = sectionHeader(page, 'Certification', y, bold, W);
   addText(page, 'I certify that all information is true and complete. False statements may result in refusal of employment or discharge.', 40, y, font, 8, rgb(0.4,0.4,0.4));
   y -= 20;
-  addText(page, 'Signed By:', 40, y, font, 8, rgb(0.5,0.5,0.5));
-  addText(page, d.sigName, 110, y, bold, 11);
+  addText(page, 'Printed Name:', 40, y, font, 8, rgb(0.5,0.5,0.5));
+  addText(page, d.sigName, 120, y, bold, 11);
   addText(page, 'Date:', 380, y, font, 8, rgb(0.5,0.5,0.5));
   addText(page, d.sigDate, 410, y, bold, 11);
-  y -= 28;
+  y -= 24;
+  // Embed drawn signature
+  if (d.signature) {
+    try {
+      const sigBytes = Buffer.from(d.signature, 'base64');
+      const sigImg = await doc.embedPng(sigBytes);
+      const { width: sw, height: sh } = sigImg.scale(1);
+      const sigW = Math.min(200, sw);
+      const sigH = (sh / sw) * sigW;
+      page.drawImage(sigImg, { x: 40, y: y - sigH, width: sigW, height: sigH });
+      y -= sigH + 8;
+    } catch(e) { y -= 8; }
+  }
   page.drawLine({ start:{x:40,y}, end:{x:280,y}, thickness:0.5, color:rgb(0.3,0.3,0.3) });
-  addText(page, 'Signature (sign above line)', 40, y-12, font, 7, rgb(0.6,0.6,0.6));
+  addText(page, 'Applicant Signature', 40, y-12, font, 7, rgb(0.6,0.6,0.6));
 
   // Page numbers
   const total = doc.getPageCount();
@@ -405,6 +418,53 @@ async function buildI9(d) {
   return doc.save();
 }
 
+// ── ID Photos page ────────────────────────────────────────────────────────────
+
+async function buildIDPage(d) {
+  const doc = await PDFDocument.create();
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const bold = await doc.embedFont(StandardFonts.HelveticaBold);
+  const page = doc.addPage([612, 792]);
+  const W = 612;
+  let y = 760;
+
+  await embedLogo(doc, page, 40, y, 120);
+  addText(page, 'Identity Documents', 175, y-10, bold, 14);
+  addText(page, `${d.firstName} ${d.lastName}  —  ${d.appDate}`, 175, y-28, font, 9, rgb(0.5,0.5,0.5));
+  y -= 60;
+  page.drawLine({ start:{x:40,y}, end:{x:W-40,y}, thickness:1, color:rgb(0.91,0.45,0.04) });
+  y -= 16;
+
+  const embedImg = async (b64, label, yPos) => {
+    if (!b64) return yPos;
+    try {
+      const bytes = Buffer.from(b64, 'base64');
+      const img = await doc.embedJpg(bytes).catch(() => doc.embedPng(bytes));
+      const { width: iw, height: ih } = img.scale(1);
+      const maxW = 240, maxH = 160;
+      const scale = Math.min(maxW/iw, maxH/ih);
+      const w = iw*scale, h = ih*scale;
+      addText(page, label, 40, yPos, bold, 9, rgb(0.91,0.45,0.04));
+      yPos -= 12;
+      page.drawImage(img, { x: 40, y: yPos - h, width: w, height: h });
+      return yPos - h - 16;
+    } catch(e) { return yPos; }
+  };
+
+  addText(page, "DRIVER'S LICENSE", 40, y, bold, 10, rgb(0,0,0)); y -= 16;
+  y = await embedImg(d.dlFront, 'Front', y);
+  y = await embedImg(d.dlBack, 'Back', y);
+  y -= 8;
+
+  const id2Label = d.id2Type === 'ss' ? 'Social Security Card' : d.id2Type === 'passport' ? 'Passport' : 'Birth Certificate';
+  addText(page, id2Label.toUpperCase(), 40, y, bold, 10, rgb(0,0,0)); y -= 16;
+  y = await embedImg(d.id2, id2Label, y);
+
+  addText(page, 'Documents verified by employer per I-9 requirements.', 40, 30, font, 7, rgb(0.6,0.6,0.6));
+
+  return doc.save();
+}
+
 // ── merge ─────────────────────────────────────────────────────────────────────
 
 async function mergePDFs(pdfBytes) {
@@ -419,20 +479,23 @@ async function mergePDFs(pdfBytes) {
 
 // ── handler ───────────────────────────────────────────────────────────────────
 
+export const config = { api: { bodyParser: { sizeLimit: '12mb' } } };
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const d = req.body;
   if (!d || !d.firstName || !d.lastName) return res.status(400).json({ error: 'Missing required fields' });
 
   try {
-    const [appPdf, w4Pdf, de4Pdf, i9Pdf] = await Promise.all([
+    const [appPdf, w4Pdf, de4Pdf, i9Pdf, idPdf] = await Promise.all([
       buildApplicationPDF(d),
       buildW4(d),
       buildDE4(d),
       buildI9(d),
+      buildIDPage(d),
     ]);
 
-    const combined = await mergePDFs([appPdf, w4Pdf, de4Pdf, i9Pdf]);
+    const combined = await mergePDFs([appPdf, w4Pdf, de4Pdf, i9Pdf, idPdf]);
     const b64 = Buffer.from(combined).toString('base64');
     const filename = `${d.lastName}_${d.firstName}_DriverApp_${(d.appDate||'').replace(/\//g,'-')}.pdf`;
 

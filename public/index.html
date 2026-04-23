@@ -51,6 +51,18 @@
     .toast.err{background:#c0392b}
     .spinner{display:none;text-align:center;padding:20px;color:#888}
     .tax-note{background:#1e2a1e;border:1px solid #2a4a2a;border-radius:8px;padding:12px;font-size:12px;color:#8a8;line-height:1.6;margin-bottom:12px}
+    /* uploads */
+    .upload-box{border:2px dashed #3a3a3a;border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s;position:relative}
+    .upload-box:hover,.upload-box.has-file{border-color:#e8730a}
+    .upload-box input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+    .upload-box .up-icon{font-size:28px;margin-bottom:6px}
+    .upload-box .up-label{font-size:13px;color:#888}
+    .upload-box .up-name{font-size:12px;color:#e8730a;margin-top:4px}
+    .preview-img{width:100%;max-height:180px;object-fit:cover;border-radius:8px;margin-top:10px;display:none}
+    /* signature pad */
+    .sig-pad-wrap{background:#fff;border-radius:8px;overflow:hidden;position:relative}
+    #sigCanvas{display:block;width:100%;height:160px;touch-action:none;cursor:crosshair}
+    .sig-clear{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.15);border:none;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;color:#333}
   </style>
 </head>
 <body>
@@ -65,7 +77,8 @@
   <button class="tab" onclick="goTab(3)">Experience</button>
   <button class="tab" onclick="goTab(4)">Emergency</button>
   <button class="tab" onclick="goTab(5)">Tax Info</button>
-  <button class="tab" onclick="goTab(6)">Submit</button>
+  <button class="tab" onclick="goTab(6)">Docs & Sig</button>
+  <button class="tab" onclick="goTab(7)">Submit</button>
 </div>
 
 <!-- ── 0 Personal ── -->
@@ -401,34 +414,183 @@
 
   <div class="nav-btns">
     <button class="btn btn-secondary" onclick="goTab(4)">← Back</button>
-    <button class="btn btn-primary" onclick="nextTab(5,6)">Next: Submit →</button>
+    <button class="btn btn-primary" onclick="nextTab(5,6)">Next: Docs & Sig →</button>
   </div>
 </div>
 
-<!-- ── 6 Submit ── -->
+<!-- ── 6 Docs & Signature ── -->
 <div class="section" id="s6">
+  <div id="err6" class="alert"></div>
+
+  <div class="card">
+    <div class="card-title">Driver's License</div>
+    <div class="field">
+      <label>Front of License *</label>
+      <div class="upload-box" id="box_dlFront">
+        <input type="file" accept="image/*" capture="environment" onchange="handleUpload(this,'dlFront','prev_dlFront','box_dlFront')">
+        <div class="up-icon">📷</div>
+        <div class="up-label">Tap to take photo or upload</div>
+        <div class="up-name" id="name_dlFront"></div>
+      </div>
+      <img id="prev_dlFront" class="preview-img">
+    </div>
+    <div class="field">
+      <label>Back of License *</label>
+      <div class="upload-box" id="box_dlBack">
+        <input type="file" accept="image/*" capture="environment" onchange="handleUpload(this,'dlBack','prev_dlBack','box_dlBack')">
+        <div class="up-icon">📷</div>
+        <div class="up-label">Tap to take photo or upload</div>
+        <div class="up-name" id="name_dlBack"></div>
+      </div>
+      <img id="prev_dlBack" class="preview-img">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Second Form of ID *</div>
+    <div class="field">
+      <label>Type</label>
+      <div class="radio-group" id="rg_id2Type">
+        <div class="radio-opt" id="id2Type_ss" onclick="radio('id2Type','ss')">SS Card</div>
+        <div class="radio-opt" id="id2Type_passport" onclick="radio('id2Type','passport')">Passport</div>
+        <div class="radio-opt" id="id2Type_birth" onclick="radio('id2Type','birth')">Birth Cert</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Upload *</label>
+      <div class="upload-box" id="box_id2">
+        <input type="file" accept="image/*" capture="environment" onchange="handleUpload(this,'id2','prev_id2','box_id2')">
+        <div class="up-icon">📄</div>
+        <div class="up-label">Tap to take photo or upload</div>
+        <div class="up-name" id="name_id2"></div>
+      </div>
+      <img id="prev_id2" class="preview-img">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Signature *</div>
+    <p style="font-size:12px;color:#888;margin-bottom:12px">Sign in the white box below using your finger or mouse.</p>
+    <div class="sig-pad-wrap">
+      <canvas id="sigCanvas"></canvas>
+      <button class="sig-clear" onclick="clearSig()">Clear</button>
+    </div>
+    <p class="hint" style="margin-top:8px">Sign above — this will appear on all documents.</p>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn btn-secondary" onclick="goTab(5)">← Back</button>
+    <button class="btn btn-primary" onclick="nextTab(6,7)">Next: Submit →</button>
+  </div>
+</div>
+
+<!-- ── 7 Submit ── -->
+<div class="section" id="s7">
   <div class="card">
     <div class="card-title">Ready to Submit</div>
-    <p style="font-size:14px;color:#aaa;line-height:1.6;margin-bottom:16px;">Submitting will generate your complete driver file (Application + W-4 + DE-4 + I-9) and email it to Pale Horse Asphalt HR.</p>
+    <p style="font-size:14px;color:#aaa;line-height:1.6;margin-bottom:16px;">Submitting will generate your complete driver file (Application + W-4 + DE-4 + I-9) and email it to Pale Horse Asphalt HR along with your ID photos.</p>
     <div id="validationErrors" class="alert"></div>
     <div class="spinner" id="spinner">Generating PDF and sending...</div>
     <button class="btn btn-primary" id="submitBtn" onclick="submitApp()">📤 Submit Application</button>
     <button class="btn btn-secondary" onclick="saveData()">💾 Save Progress</button>
     <button class="btn btn-danger" onclick="clearData()">🗑 Clear All</button>
   </div>
-  <div class="nav-btns"><button class="btn btn-secondary" onclick="goTab(5)">← Back</button></div>
+  <div class="nav-btns"><button class="btn btn-secondary" onclick="goTab(6)">← Back</button></div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
 let state = {};
+const uploads = { dlFront: null, dlBack: null, id2: null };
 
 function goTab(n) {
   document.querySelectorAll('.section').forEach((s,i) => s.classList.toggle('active', i===n));
   document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===n));
   window.scrollTo(0,0);
 }
+
+// ── Image upload & compress ──────────────────────────────────────────────────
+function handleUpload(input, key, prevId, boxId) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 900;
+      const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const b64 = canvas.toDataURL('image/jpeg', 0.78).split(',')[1];
+      uploads[key] = b64;
+      const prev = document.getElementById(prevId);
+      prev.src = 'data:image/jpeg;base64,' + b64;
+      prev.style.display = 'block';
+      document.getElementById('name_' + key).textContent = file.name;
+      document.getElementById(boxId).classList.add('has-file');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── Signature pad ────────────────────────────────────────────────────────────
+const sigPad = (() => {
+  let canvas, ctx, drawing = false, empty = true;
+  const init = () => {
+    canvas = document.getElementById('sigCanvas');
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr || 560 * dpr;
+    canvas.height = 160 * dpr;
+    ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    ctx.strokeStyle = '#111';
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+  };
+  const pos = e => {
+    const r = canvas.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return { x: src.clientX - r.left, y: src.clientY - r.top };
+  };
+  const start = e => { e.preventDefault(); init(); const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); drawing=true; };
+  const move = e => { e.preventDefault(); if(!drawing)return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); empty=false; };
+  const end = () => { drawing=false; };
+  return {
+    setup() {
+      const c = document.getElementById('sigCanvas');
+      c.addEventListener('mousedown',start); c.addEventListener('mousemove',move); c.addEventListener('mouseup',end);
+      c.addEventListener('touchstart',start,{passive:false}); c.addEventListener('touchmove',move,{passive:false}); c.addEventListener('touchend',end);
+      init();
+    },
+    clear() { init(); empty=true; },
+    isEmpty() { return empty; },
+    toBase64() {
+      if(empty) return null;
+      const tmp = document.createElement('canvas');
+      tmp.width = canvas.width; tmp.height = canvas.height;
+      const tc = tmp.getContext('2d');
+      tc.fillStyle='#fff'; tc.fillRect(0,0,tmp.width,tmp.height);
+      tc.drawImage(canvas,0,0);
+      return tmp.toDataURL('image/png').split(',')[1];
+    }
+  };
+})();
+
+function clearSig() { sigPad.clear(); }
+
+// Init sig pad when its tab becomes visible
+const _baseGoTab = goTab;
+goTab = function(n) {
+  _baseGoTab(n);
+  if(n===6) setTimeout(()=>sigPad.setup(), 60);
+};
 
 function radio(name, val) {
   state[name] = val;
@@ -504,6 +666,15 @@ const tabRules = {
     if(!v('de4FilingStatus')){markErr('de4FilingStatus');errs.push('CA DE-4 filing status required');}
     return errs;
   },
+  6: () => {
+    const errs=[];
+    if(!uploads.dlFront) errs.push('DL front photo required');
+    if(!uploads.dlBack) errs.push('DL back photo required');
+    if(!uploads.id2) errs.push('Second ID photo required');
+    if(!state.id2Type) errs.push('Second ID type required');
+    if(sigPad.isEmpty()) errs.push('Signature required — please sign in the box');
+    return errs;
+  },
 };
 
 function nextTab(from, to) {
@@ -553,6 +724,9 @@ function collectData() {
     w4OtherIncome:v('w4OtherIncome')||'0', w4Deductions:v('w4Deductions')||'0', w4Extra:v('w4Extra')||'0',
     de4FilingStatus:v('de4FilingStatus'), de4Allowances:v('de4Allowances')||'1',
     de4Extra:v('de4Extra')||'0', de4Exempt:state.de4Exempt||'no',
+    dlFront: uploads.dlFront, dlBack: uploads.dlBack,
+    id2: uploads.id2, id2Type: state.id2Type||'',
+    signature: sigPad.toBase64(),
   };
 }
 

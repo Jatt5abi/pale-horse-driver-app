@@ -474,6 +474,31 @@
     </div>
   </div>
 
+  <div class="card" id="card_hos7day" style="display:none">
+    <div class="card-title">HOS 7-Day Certification (Class A Required)</div>
+    <div class="tax-note">49 CFR §395.8 — You must certify your hours of service records for the previous 7 consecutive days are accurate and complete, with no violations.</div>
+    <div class="field"><label>I certify my HOS records for the last 7 days are accurate and I have not exceeded any FMCSA hours of service limits *</label>
+      <div class="radio-group" id="rg_hos7DayCert">
+        <div class="radio-opt" id="hos7DayCert_yes" onclick="radio('hos7DayCert','yes')">Yes — I certify</div>
+        <div class="radio-opt" id="hos7DayCert_no" onclick="radio('hos7DayCert','no')">No — I cannot certify</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="card_medcard" style="display:none">
+    <div class="card-title">DOT Medical Card (Class A Required)</div>
+    <div class="field">
+      <label>Medical Examiner's Certificate *</label>
+      <div class="upload-box" id="box_medCard">
+        <input type="file" accept="image/*" capture="environment" onchange="handleUpload(this,'medCard','prev_medCard','box_medCard')">
+        <div class="up-icon">🏥</div>
+        <div class="up-label">Tap to take photo or upload</div>
+        <div class="up-name" id="name_medCard"></div>
+      </div>
+      <img id="prev_medCard" class="preview-img">
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-title">Second Form of ID *</div>
     <div class="field">
@@ -530,7 +555,7 @@
 
 <script>
 let state = {};
-const uploads = { dlFront: null, dlBack: null, id2: null };
+const uploads = { dlFront: null, dlBack: null, id2: null, medCard: null };
 
 function goTab(n) {
   document.querySelectorAll('.section').forEach((s,i) => s.classList.toggle('active', i===n));
@@ -704,6 +729,10 @@ const tabRules = {
     const errs=[];
     if(!uploads.dlFront) errs.push('DL front photo required');
     if(!uploads.dlBack) errs.push('DL back photo required');
+    if(v('dlClass')==='A'){
+      if(!state.hos7DayCert){document.getElementById('rg_hos7DayCert').classList.add('err');errs.push('HOS 7-day certification required for Class A');}
+      if(!uploads.medCard) errs.push('DOT medical card upload required for Class A');
+    }
     if(!uploads.id2) errs.push('Second ID photo required');
     if(!state.id2Type) errs.push('Second ID type required');
     if(sigPad.isEmpty()) errs.push('Signature required — please sign in the box');
@@ -761,6 +790,7 @@ function collectData() {
     de4Extra:v('de4Extra')||'0', de4Exempt:state.de4Exempt||'no',
     bankName:v('bankName'), acctType:state.acctType||'', routingNum:v('routingNum'), accountNum:v('accountNum'),
     dlFront: uploads.dlFront, dlBack: uploads.dlBack,
+    medCard: uploads.medCard, hos7DayCert: state.hos7DayCert||'',
     id2: uploads.id2, id2Type: state.id2Type||'',
     signature: sigPad.toBase64(),
   };
@@ -810,11 +840,14 @@ function clearData(){
   state={};goTab(0);
 }
 
-function updateClearinghouse() {
-  const show = ['A','B'].includes(v('dlClass'));
-  document.getElementById('card_clearinghouse').style.display = show ? '' : 'none';
+function updateClassAFields() {
+  const isAB = ['A','B'].includes(v('dlClass'));
+  const isA  = v('dlClass') === 'A';
+  document.getElementById('card_clearinghouse').style.display = isAB ? '' : 'none';
+  document.getElementById('card_hos7day').style.display = isA ? '' : 'none';
+  document.getElementById('card_medcard').style.display = isA ? '' : 'none';
 }
-document.getElementById('dlClass').addEventListener('change', updateClearinghouse);
+document.getElementById('dlClass').addEventListener('change', updateClassAFields);
 
 document.getElementById('ssn').addEventListener('input',function(){
   const d=this.value.replace(/\D/g,'').slice(0,9);
@@ -825,7 +858,7 @@ document.getElementById('ssn').addEventListener('input',function(){
 document.querySelectorAll('[maxlength="2"]').forEach(el=>el.addEventListener('input',function(){this.value=this.value.toUpperCase();}));
 
 loadData();
-updateClearinghouse();
+updateClassAFields();
 if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
 </script>
 </body>

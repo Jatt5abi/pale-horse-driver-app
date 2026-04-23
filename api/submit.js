@@ -139,6 +139,7 @@ async function buildApplicationPDF(d) {
     ['Drug/Alcohol Test Positive', d.drugTest],
     ['Test Refusal', d.refusedTest],
     ...(d.clearinghouseConsent ? [['FMCSA Clearinghouse Consent', d.clearinghouseConsent === 'yes' ? 'Yes — Consented' : 'No — Refused']] : []),
+    ...(d.hos7DayCert ? [['HOS 7-Day Certification', d.hos7DayCert === 'yes' ? 'Certified — No violations last 7 days' : 'Not certified']] : []),
     ['', ''],
   ], y, font, bold, W);
   y -= 8;
@@ -532,6 +533,12 @@ async function buildIDPage(d) {
   const id2Label = d.id2Type === 'ss' ? 'Social Security Card' : d.id2Type === 'passport' ? 'Passport' : 'Birth Certificate';
   addText(page, id2Label.toUpperCase(), 40, y, bold, 10, rgb(0,0,0)); y -= 16;
   y = await embedImg(d.id2, id2Label, y);
+
+  if (d.medCard) {
+    y -= 8;
+    addText(page, 'DOT MEDICAL CARD', 40, y, bold, 10, rgb(0,0,0)); y -= 16;
+    y = await embedImg(d.medCard, "Medical Examiner's Certificate", y);
+  }
 
   addText(page, 'Documents verified by employer per I-9 requirements.', 40, 30, font, 7, rgb(0.6,0.6,0.6));
 

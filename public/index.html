@@ -130,7 +130,7 @@
         <div class="radio-opt" id="workedBefore_no" onclick="radio('workedBefore','no')">No</div>
       </div>
     </div>
-    <div class="field"><label>Pay Expected ($/hr) *</label><input id="payExpected" type="text" placeholder="e.g. 45-50/hr"></div>
+    <div class="field"><label>Pay Expected ($/hr) *</label><input id="payExpected" type="text" placeholder="CA min $16.50/hr"></div>
   </div>
   <div class="nav-btns"><button class="btn btn-primary" onclick="nextTab(0,1)">Next: License →</button></div>
 </div>
@@ -402,6 +402,20 @@
     </div>
   </div>
 
+  <div class="card">
+    <div class="card-title">Direct Deposit</div>
+    <div class="field"><label>Bank Name *</label><input id="bankName" type="text" placeholder="e.g. Chase, Wells Fargo"></div>
+    <div class="field"><label>Account Type *</label>
+      <div class="radio-group" id="rg_acctType">
+        <div class="radio-opt" id="acctType_checking" onclick="radio('acctType','checking')">Checking</div>
+        <div class="radio-opt" id="acctType_savings" onclick="radio('acctType','savings')">Savings</div>
+      </div>
+    </div>
+    <div class="field"><label>Routing Number *</label><input id="routingNum" type="text" inputmode="numeric" maxlength="9" placeholder="9 digits"></div>
+    <div class="field"><label>Account Number *</label><input id="accountNum" type="text" inputmode="numeric" placeholder="Account number"></div>
+    <p class="hint">Your paycheck will be deposited directly to this account.</p>
+  </div>
+
   <div class="nav-btns">
     <button class="btn btn-secondary" onclick="goTab(3)">← Back</button>
     <button class="btn btn-primary" onclick="nextTab(4,5)">Next: Docs & Sig →</button>
@@ -650,6 +664,8 @@ const tabRules = {
     [['ecName','Emergency Contact Name'],['ecRel','Emergency Contact Relationship'],['ecPhone','Emergency Contact Phone'],['sigName','Signature (typed name)'],['sigDate','Signature Date']].forEach(([id,lbl])=>{ if(!v(id)){markErr(id);errs.push(lbl+' is required');} });
     if(!v('w4FilingStatus')){markErr('w4FilingStatus');errs.push('Federal W-4 filing status required');}
     if(!v('de4FilingStatus')){markErr('de4FilingStatus');errs.push('CA DE-4 filing status required');}
+    [['bankName','Bank Name'],['routingNum','Routing Number'],['accountNum','Account Number']].forEach(([id,lbl])=>{ if(!v(id)){markErr(id);errs.push(lbl+' is required');} });
+    if(!state.acctType){document.getElementById('rg_acctType').classList.add('err');errs.push('Account type required');}
     return errs;
   },
   5: () => {
@@ -710,6 +726,7 @@ function collectData() {
     w4OtherIncome:v('w4OtherIncome')||'0', w4Deductions:v('w4Deductions')||'0', w4Extra:v('w4Extra')||'0',
     de4FilingStatus:v('de4FilingStatus'), de4Allowances:v('de4Allowances')||'1',
     de4Extra:v('de4Extra')||'0', de4Exempt:state.de4Exempt||'no',
+    bankName:v('bankName'), acctType:state.acctType||'', routingNum:v('routingNum'), accountNum:v('accountNum'),
     dlFront: uploads.dlFront, dlBack: uploads.dlBack,
     id2: uploads.id2, id2Type: state.id2Type||'',
     signature: sigPad.toBase64(),

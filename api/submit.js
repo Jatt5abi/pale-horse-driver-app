@@ -418,6 +418,59 @@ async function buildI9(d) {
   return doc.save();
 }
 
+// ── Direct Deposit page ──────────────────────────────────────────────────────
+
+async function buildDirectDeposit(d) {
+  const doc = await PDFDocument.create();
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const bold = await doc.embedFont(StandardFonts.HelveticaBold);
+  const page = doc.addPage([612, 792]);
+  const W = 612;
+  let y = 760;
+
+  await embedLogo(doc, page, 40, y, 120);
+  addText(page, 'Direct Deposit Authorization', 175, y-10, bold, 14);
+  addText(page, `${d.firstName} ${d.lastName}  —  ${d.appDate}`, 175, y-28, font, 9, rgb(0.5,0.5,0.5));
+  y -= 60;
+  page.drawLine({ start:{x:40,y}, end:{x:W-40,y}, thickness:1, color:rgb(0.91,0.45,0.04) });
+  y -= 24;
+
+  addText(page, 'I authorize Pale Horse Asphalt Engineering to deposit my pay directly to the account below.', 40, y, font, 9, rgb(0.4,0.4,0.4));
+  y -= 30;
+
+  y = twoCol(page, [
+    ['Employee Name', `${d.firstName} ${d.lastName}`],
+    ['SSN', d.ssn],
+    ['Bank Name', d.bankName],
+    ['Account Type', d.acctType ? d.acctType.charAt(0).toUpperCase()+d.acctType.slice(1) : ''],
+    ['Routing Number', d.routingNum],
+    ['Account Number', d.accountNum],
+  ], y, font, bold, W);
+  y -= 24;
+
+  addText(page, 'Employee Signature:', 40, y, font, 8, rgb(0.5,0.5,0.5));
+  page.drawLine({ start:{x:150,y:y-2}, end:{x:360,y:y-2}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
+  addText(page, 'Date:', 370, y, font, 8, rgb(0.5,0.5,0.5));
+  page.drawLine({ start:{x:400,y:y-2}, end:{x:560,y:y-2}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
+  y -= 28;
+
+  if (d.signature) {
+    try {
+      const sigBytes = Buffer.from(d.signature, 'base64');
+      const sigImg = await doc.embedPng(sigBytes);
+      const { width: sw, height: sh } = sigImg.scale(1);
+      const sigW = Math.min(180, sw);
+      const sigH = (sh/sw)*sigW;
+      page.drawImage(sigImg, { x: 150, y: y-sigH, width: sigW, height: sigH });
+      y -= sigH + 8;
+    } catch(e) {}
+  }
+
+  addText(page, 'Attach a voided check or bank letter to verify routing and account numbers.', 40, y-10, font, 8, rgb(0.6,0.6,0.6));
+
+  return doc.save();
+}
+
 // ── ID Photos page ────────────────────────────────────────────────────────────
 
 async function buildIDPage(d) {
@@ -487,15 +540,16 @@ export default async function handler(req, res) {
   if (!d || !d.firstName || !d.lastName) return res.status(400).json({ error: 'Missing required fields' });
 
   try {
-    const [appPdf, w4Pdf, de4Pdf, i9Pdf, idPdf] = await Promise.all([
+    const [appPdf, w4Pdf, de4Pdf, i9Pdf, ddPdf, idPdf] = await Promise.all([
       buildApplicationPDF(d),
       buildW4(d),
       buildDE4(d),
       buildI9(d),
+      buildDirectDeposit(d),
       buildIDPage(d),
     ]);
 
-    const combined = await mergePDFs([appPdf, w4Pdf, de4Pdf, i9Pdf, idPdf]);
+    const combined = await mergePDFs([appPdf, w4Pdf, de4Pdf, i9Pdf, ddPdf, idPdf]);
     const b64 = Buffer.from(combined).toString('base64');
     const filename = `${d.lastName}_${d.firstName}_DriverApp_${(d.appDate||'').replace(/\//g,'-')}.pdf`;
 

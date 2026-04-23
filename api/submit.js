@@ -257,8 +257,18 @@ async function buildW4(d) {
   addText(page, 'Employee Signature:', 40, y, font, 8, rgb(0.5,0.5,0.5));
   page.drawLine({ start:{x:150,y:y-2}, end:{x:360,y:y-2}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
   addText(page, 'Date:', 370, y, font, 8, rgb(0.5,0.5,0.5));
+  if (d.sigDate) addText(page, d.sigDate, 400, y, font, 10);
   page.drawLine({ start:{x:400,y:y-2}, end:{x:560,y:y-2}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
-  y -= 28;
+  if (d.signature) {
+    try {
+      const sigBytes = Buffer.from(d.signature, 'base64');
+      const sigImg = await doc.embedPng(sigBytes);
+      const {width:sw,height:sh} = sigImg.scale(1);
+      const sigW = Math.min(180,sw), sigH = (sh/sw)*sigW;
+      page.drawImage(sigImg, {x:150, y:y-sigH, width:sigW, height:sigH});
+      y -= sigH + 8;
+    } catch(e) { y -= 28; }
+  } else { y -= 28; }
 
   addText(page, "Employer: Pale Horse Asphalt Engineering  |  7000 Button Lane, Dixon CA 95620", 40, y, font, 9);
   y -= 16;
@@ -329,8 +339,18 @@ async function buildDE4(d) {
   addText(page, 'Employee Signature:', 40, y, font, 8, rgb(0.5,0.5,0.5));
   page.drawLine({ start:{x:150,y:y-2}, end:{x:360,y:y-2}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
   addText(page, 'Date:', 370, y, font, 8, rgb(0.5,0.5,0.5));
+  if (d.sigDate) addText(page, d.sigDate, 400, y, font, 10);
   page.drawLine({ start:{x:400,y:y-2}, end:{x:560,y:y-2}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
-  y -= 28;
+  if (d.signature) {
+    try {
+      const sigBytes = Buffer.from(d.signature, 'base64');
+      const sigImg = await doc.embedPng(sigBytes);
+      const {width:sw,height:sh} = sigImg.scale(1);
+      const sigW = Math.min(180,sw), sigH = (sh/sw)*sigW;
+      page.drawImage(sigImg, {x:150, y:y-sigH, width:sigW, height:sigH});
+      y -= sigH + 8;
+    } catch(e) { y -= 28; }
+  } else { y -= 28; }
 
   addText(page, "Employer: Pale Horse Asphalt Engineering  |  7000 Button Lane, Dixon CA 95620", 40, y, font, 9);
   y -= 30;
@@ -452,9 +472,8 @@ async function buildDirectDeposit(d) {
   addText(page, 'Employee Signature:', 40, y, font, 8, rgb(0.5,0.5,0.5));
   page.drawLine({ start:{x:150,y:y-2}, end:{x:360,y:y-2}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
   addText(page, 'Date:', 370, y, font, 8, rgb(0.5,0.5,0.5));
+  if (d.sigDate) addText(page, d.sigDate, 400, y, font, 10);
   page.drawLine({ start:{x:400,y:y-2}, end:{x:560,y:y-2}, thickness:0.6, color:rgb(0.3,0.3,0.3) });
-  y -= 28;
-
   if (d.signature) {
     try {
       const sigBytes = Buffer.from(d.signature, 'base64');
@@ -464,8 +483,8 @@ async function buildDirectDeposit(d) {
       const sigH = (sh/sw)*sigW;
       page.drawImage(sigImg, { x: 150, y: y-sigH, width: sigW, height: sigH });
       y -= sigH + 8;
-    } catch(e) {}
-  }
+    } catch(e) { y -= 28; }
+  } else { y -= 28; }
 
   addText(page, 'Attach a voided check or bank letter to verify routing and account numbers.', 40, y-10, font, 8, rgb(0.6,0.6,0.6));
 

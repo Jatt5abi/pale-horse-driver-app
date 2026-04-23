@@ -238,15 +238,15 @@ async function buildW4(d) {
 
   label('(c) Filing status', 40, y);
   y -= 16;
-  page.drawText('☐ Single or MFS', { x: 46, y, size: 10, font, color: rgb(0,0,0) });
-  page.drawText('☒ Married filing jointly (or QSS)', { x: 200, y, size: 10, font: boldFont, color: rgb(0,0,0) });
-  page.drawText('☐ Head of household', { x: 420, y, size: 10, font, color: rgb(0,0,0) });
+  page.drawText('[ ] Single or MFS', { x: 46, y, size: 10, font, color: rgb(0,0,0) });
+  page.drawText('[X] Married filing jointly (or QSS)', { x: 200, y, size: 10, font: boldFont, color: rgb(0,0,0) });
+  page.drawText('[ ] Head of household', { x: 420, y, size: 10, font, color: rgb(0,0,0) });
   y -= 30;
 
   // Step 2
   page.drawText('Step 2: Multiple Jobs or Spouse Works', { x: 40, y, size: 10, font: boldFont, color: rgb(0,0,0) });
   y -= 16;
-  page.drawText('☒ (c) If there are only two jobs total, you may check this box.', { x: 46, y, size: 10, font: boldFont, color: rgb(0,0,0) });
+  page.drawText('[X] (c) If there are only two jobs total, you may check this box.', { x: 46, y, size: 10, font: boldFont, color: rgb(0,0,0) });
   y -= 12;
   page.drawText('    Do the same on Form W-4 for the other job.', { x: 46, y, size: 9, font, color: rgb(0.4,0.4,0.4) });
   y -= 26;
@@ -341,11 +341,11 @@ async function buildDE4(d) {
   // Filing status
   page.drawText('Filing Status', { x: 40, y, size: 10, font: boldFont, color: rgb(0,0,0) });
   y -= 18;
-  page.drawText('☐ Single', { x: 46, y, size: 10, font, color: rgb(0,0,0) });
-  page.drawText('☒ Married (and spouse does not work)', { x: 150, y, size: 10, font, color: rgb(0,0,0) });
+  page.drawText('[ ] Single', { x: 46, y, size: 10, font, color: rgb(0,0,0) });
+  page.drawText('[X] Married (and spouse does not work)', { x: 150, y, size: 10, font, color: rgb(0,0,0) });
   y -= 14;
-  page.drawText('☒ Married (but withhold as Single or MFS) — two incomes', { x: 46, y, size: 10, font: boldFont, color: rgb(0,0,0) });
-  page.drawText('☐ Head of Household', { x: 46, y: y-14, size: 10, font, color: rgb(0,0,0) });
+  page.drawText('[X] Married (but withhold as Single or MFS) — two incomes', { x: 46, y, size: 10, font: boldFont, color: rgb(0,0,0) });
+  page.drawText('[ ] Head of Household', { x: 46, y: y-14, size: 10, font, color: rgb(0,0,0) });
   y -= 42;
 
   // Allowances
@@ -447,13 +447,13 @@ async function buildI9(d) {
   // Attestation
   page.drawText('Attestation of Citizenship / Immigration Status:', { x: 40, y, size: 10, font: boldFont, color: rgb(0,0,0) });
   y -= 18;
-  page.drawText('☒ 1. A citizen of the United States', { x: 46, y, size: 10, font: boldFont, color: rgb(0,0,0) });
+  page.drawText('[X] 1. A citizen of the United States', { x: 46, y, size: 10, font: boldFont, color: rgb(0,0,0) });
   y -= 14;
-  page.drawText('☐ 2. A noncitizen national of the United States', { x: 46, y, size: 10, font, color: rgb(0,0,0) });
+  page.drawText('[ ] 2. A noncitizen national of the United States', { x: 46, y, size: 10, font, color: rgb(0,0,0) });
   y -= 14;
-  page.drawText('☐ 3. A lawful permanent resident (Alien Registration No.)', { x: 46, y, size: 10, font, color: rgb(0,0,0) });
+  page.drawText('[ ] 3. A lawful permanent resident (Alien Registration No.)', { x: 46, y, size: 10, font, color: rgb(0,0,0) });
   y -= 14;
-  page.drawText('☐ 4. An alien authorized to work until:', { x: 46, y, size: 10, font, color: rgb(0,0,0) });
+  page.drawText('[ ] 4. An alien authorized to work until:', { x: 46, y, size: 10, font, color: rgb(0,0,0) });
   y -= 28;
 
   // Signature

@@ -334,6 +334,19 @@
       </div>
     </div>
   </div>
+
+  <div class="card" id="card_clearinghouse" style="display:none">
+    <div class="card-title">FMCSA Drug &amp; Alcohol Clearinghouse</div>
+    <div class="tax-note">Required for CDL Class A/B. Federal law (49 CFR §382.701) requires employers to query the Clearinghouse before hiring a CDL driver.</div>
+    <div class="field"><label>I consent to a full query of the FMCSA Drug &amp; Alcohol Clearinghouse *</label>
+      <div class="radio-group" id="rg_clearinghouseConsent">
+        <div class="radio-opt" id="clearinghouseConsent_yes" onclick="radio('clearinghouseConsent','yes')">Yes — I consent</div>
+        <div class="radio-opt" id="clearinghouseConsent_no" onclick="radio('clearinghouseConsent','no')">No — I do not consent</div>
+      </div>
+    </div>
+    <p class="hint">Refusing consent may disqualify you from CDL positions per FMCSA regulations.</p>
+  </div>
+
   <div class="nav-btns">
     <button class="btn btn-secondary" onclick="goTab(2)">← Back</button>
     <button class="btn btn-primary" onclick="nextTab(3,4)">Next: Emergency →</button>
@@ -667,6 +680,10 @@ const tabRules = {
     if(!state.violations){document.getElementById('rg_violations').classList.add('err');errs.push('Violation history required');}
     if(!state.drugTest){document.getElementById('rg_drugTest').classList.add('err');errs.push('Drug/alcohol test question required');}
     if(!state.refusedTest){document.getElementById('rg_refusedTest').classList.add('err');errs.push('Test refusal question required');}
+    if(['A','B'].includes(v('dlClass')) && !state.clearinghouseConsent){
+      document.getElementById('rg_clearinghouseConsent').classList.add('err');
+      errs.push('FMCSA Clearinghouse consent required for CDL Class A/B');
+    }
     return errs;
   },
   4: () => {
@@ -733,6 +750,7 @@ function collectData() {
     accidents:state.accidents||'', accidentDetails:v('accidentDetails'),
     violations:state.violations||'', violationDetails:v('violationDetails'),
     drugTest:state.drugTest||'', refusedTest:state.refusedTest||'',
+    clearinghouseConsent:state.clearinghouseConsent||'',
     ecName:v('ecName'), ecRel:v('ecRel'), ecPhone:v('ecPhone'),
     sigName:v('sigName'), sigDate:fmt(v('sigDate')),
     w4FilingStatus:v('w4FilingStatus'), w4MultiJob:state.w4MultiJob||'no',
@@ -791,6 +809,12 @@ function clearData(){
   state={};goTab(0);
 }
 
+function updateClearinghouse() {
+  const show = ['A','B'].includes(v('dlClass'));
+  document.getElementById('card_clearinghouse').style.display = show ? '' : 'none';
+}
+document.getElementById('dlClass').addEventListener('change', updateClearinghouse);
+
 document.getElementById('ssn').addEventListener('input',function(){
   const d=this.value.replace(/\D/g,'').slice(0,9);
   if(d.length>5) this.value=d.slice(0,3)+'-'+d.slice(3,5)+'-'+d.slice(5);
@@ -800,6 +824,7 @@ document.getElementById('ssn').addEventListener('input',function(){
 document.querySelectorAll('[maxlength="2"]').forEach(el=>el.addEventListener('input',function(){this.value=this.value.toUpperCase();}));
 
 loadData();
+updateClearinghouse();
 if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
 </script>
 </body>

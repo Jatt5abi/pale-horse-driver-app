@@ -138,6 +138,7 @@ async function buildApplicationPDF(d) {
     ['Violations (3 yr)', d.violations === 'none' ? 'None' : d.violationDetails || d.violations],
     ['Drug/Alcohol Test Positive', d.drugTest],
     ['Test Refusal', d.refusedTest],
+    ...(d.clearinghouseConsent ? [['FMCSA Clearinghouse Consent', d.clearinghouseConsent === 'yes' ? 'Yes — Consented' : 'No — Refused']] : []),
     ['', ''],
   ], y, font, bold, W);
   y -= 8;

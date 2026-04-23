@@ -91,7 +91,8 @@ async function buildApplicationPDF(d) {
     ['Phone', fmtPhone(d.phone)],
     ['Email', d.email],
     ['Work Eligible (US)', d.eligible],
-    ['Address', `${d.street}, ${d.city}, ${d.state} ${d.zip}`],
+    ['Street', d.street],
+    ['City / State / ZIP', `${d.city}, ${d.state} ${d.zip}`],
     ['Pay Expected', d.payExpected],
     ['Date Available', d.dateAvail],
     ['Previously Employed Here', d.workedBefore],
@@ -587,45 +588,37 @@ async function buildIDPage(d) {
 
   addText(page, 'Documents verified by employer per I-9 requirements.', 40, 30, font, 7, rgb(0.6,0.6,0.6));
 
-  if (d.medCard) {
-    // Medical card on its own page — PDFs especially need full page
-    page = doc.addPage([612, 792]);
-    let my = 760;
-    await embedLogo(doc, page, 40, my, 120);
-    addText(page, 'DOT Medical Examiner\'s Certificate', 175, my-10, bold, 13);
-    addText(page, `${d.firstName} ${d.lastName}  —  ${d.appDate}`, 175, my-26, font, 9, rgb(0.5,0.5,0.5));
-    my -= 60;
-    page.drawLine({ start:{x:40,y:my}, end:{x:572,y:my}, thickness:1, color:rgb(0.91,0.45,0.04) });
-    my -= 20;
-    if (d.medCardIsPdf) {
-      try {
-        const bytes = Buffer.from(d.medCard, 'base64');
-        const embPages = await doc.embedPdf(bytes); // all pages
-        for (let pi = 0; pi < embPages.length; pi++) {
-          if (pi > 0) { page = doc.addPage([612, 792]); my = 750; }
-          const embPage = embPages[pi];
-          const { width: pw, height: ph } = embPage;
-          const scale = Math.min(532/pw, (my - 40)/ph);
-          const w = pw*scale, h = ph*scale;
-          page.drawPage(embPage, { x: 40, y: my - h, width: w, height: h });
-        }
-      } catch(e) {
-        addText(page, 'Medical card PDF could not be rendered.', 40, my, font, 10, rgb(0.8,0.2,0.2));
-      }
-    } else {
-      try {
-        const bytes = Buffer.from(d.medCard, 'base64');
-        const img = await doc.embedJpg(bytes).catch(() => doc.embedPng(bytes));
-        const { width: iw, height: ih } = img.scale(1);
-        const maxH = my - 40;
-        const scale = Math.min(532/iw, maxH/ih);
-        const w = iw*scale, h = ih*scale;
-        page.drawImage(img, { x: 40, y: my - h, width: w, height: h });
-      } catch(e) {}
-    }
-    addText(page, '49 CFR §391.41 — Medical certificate required for CDL drivers.', 40, 18, font, 7, rgb(0.6,0.6,0.6));
-  }
+  return doc.save();
+}
 
+// ── Medical card pages ────────────────────────────────────────────────────────
+
+async function buildMedCardPdf(d) {
+  if (!d.medCard) return null;
+  if (d.medCardIsPdf) {
+    // Return raw PDF bytes — merge will copy pages at full size
+    return Buffer.from(d.medCard, 'base64');
+  }
+  // Image — build a single page PDF
+  const doc = await PDFDocument.create();
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const bold = await doc.embedFont(StandardFonts.HelveticaBold);
+  const page = doc.addPage([612, 792]);
+  let y = 760;
+  await embedLogo(doc, page, 40, y, 120);
+  addText(page, "DOT Medical Examiner's Certificate", 175, y-10, bold, 13);
+  addText(page, `${d.firstName} ${d.lastName}  —  ${d.appDate}`, 175, y-26, font, 9, rgb(0.5,0.5,0.5));
+  y -= 60;
+  page.drawLine({ start:{x:40,y}, end:{x:572,y}, thickness:1, color:rgb(0.91,0.45,0.04) });
+  y -= 20;
+  try {
+    const bytes = Buffer.from(d.medCard, 'base64');
+    const img = await doc.embedJpg(bytes).catch(() => doc.embedPng(bytes));
+    const { width: iw, height: ih } = img.scale(1);
+    const scale = Math.min(532/iw, (y-40)/ih);
+    page.drawImage(img, { x: 40, y: y - ih*scale, width: iw*scale, height: ih*scale });
+  } catch(e) {}
+  addText(page, '49 CFR §391.41', 40, 18, font, 7, rgb(0.6,0.6,0.6));
   return doc.save();
 }
 
@@ -721,17 +714,18 @@ export default async function handler(req, res) {
   if (!d || !d.firstName || !d.lastName) return res.status(400).json({ error: 'Missing required fields' });
 
   try {
-    const [appPdf, w4Pdf, de4Pdf, i9Pdf, ddPdf, idPdf, clPdf] = await Promise.all([
+    const [appPdf, w4Pdf, de4Pdf, i9Pdf, ddPdf, idPdf, medPdf, clPdf] = await Promise.all([
       buildApplicationPDF(d),
       buildW4(d),
       buildDE4(d),
       buildI9(d),
       buildDirectDeposit(d),
       buildIDPage(d),
+      buildMedCardPdf(d),
       d.clearinghouseConsent === 'yes' ? buildClearinghousePage(d) : Promise.resolve(null),
     ]);
 
-    const combined = await mergePDFs([appPdf, w4Pdf, de4Pdf, i9Pdf, ddPdf, idPdf, ...(clPdf ? [clPdf] : [])]);
+    const combined = await mergePDFs([appPdf, w4Pdf, de4Pdf, i9Pdf, ddPdf, idPdf, ...(medPdf ? [medPdf] : []), ...(clPdf ? [clPdf] : [])]);
     const b64 = Buffer.from(combined).toString('base64');
     const filename = `${d.lastName}_${d.firstName}_DriverApp_${(d.appDate||'').replace(/\//g,'-')}.pdf`;
 

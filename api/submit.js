@@ -552,6 +552,79 @@ async function buildIDPage(d) {
   return doc.save();
 }
 
+// ── clearinghouse consent page ────────────────────────────────────────────────
+
+async function buildClearinghousePage(d) {
+  const doc = await PDFDocument.create();
+  const font = await doc.embedFont(StandardFonts.Helvetica);
+  const bold = await doc.embedFont(StandardFonts.HelveticaBold);
+  const W = 612;
+  const page = doc.addPage([W, 792]);
+  let y = 750;
+
+  addText(page, 'Pale Horse Asphalt Engineering', 40, y, bold, 12);
+  addText(page, '19256 California Hwy 99, Acampo CA 95220', 40, y-16, font, 9, rgb(0.5,0.5,0.5));
+  y -= 36;
+  page.drawLine({ start:{x:40,y}, end:{x:W-40,y}, thickness:1.5, color:rgb(0.91,0.45,0.04) });
+  y -= 24;
+
+  addText(page, 'FMCSA DRUG AND ALCOHOL CLEARINGHOUSE', 40, y, bold, 14, rgb(0.1,0.1,0.1));
+  y -= 18;
+  addText(page, 'CONSENT TO RELEASE INFORMATION — 49 CFR §382.701', 40, y, font, 10, rgb(0.5,0.5,0.5));
+  y -= 32;
+
+  addText(page, `${d.firstName} ${d.lastName}`, 40, y, bold, 15);
+  y -= 18;
+  addText(page, `SSN: ${d.ssn}   |   DOB: ${d.dob}`, 40, y, font, 9, rgb(0.5,0.5,0.5));
+  y -= 30;
+
+  const lines = [
+    `I, ${d.firstName} ${d.lastName}, hereby authorize Pale Horse Asphalt Engineering`,
+    'to conduct a full query of the Federal Motor Carrier Safety Administration (FMCSA)',
+    'Drug and Alcohol Clearinghouse to obtain information regarding any drug or alcohol',
+    'program violations I have committed, and to obtain information about any return-to-duty',
+    'status and required follow-up testing plans.',
+    '',
+    'I understand that:',
+    '  •  This consent is valid for 24 months from the date of signature, or until I separate',
+    '     from this employer, whichever occurs first.',
+    '  •  The employer may conduct a full query, which will be recorded in the Clearinghouse.',
+    '  •  I may revoke this consent in writing at any time; revocation does not affect queries',
+    '     already completed under this consent.',
+    '  •  Information released is limited to violations under 49 CFR Part 382.',
+  ];
+  for (const line of lines) {
+    addText(page, line, 40, y, font, 10, rgb(0.1,0.1,0.1));
+    y -= 16;
+  }
+  y -= 24;
+
+  addText(page, 'Printed Name:', 40, y, font, 8, rgb(0.5,0.5,0.5));
+  addText(page, `${d.firstName} ${d.lastName}`, 130, y, bold, 11);
+  addText(page, 'Date:', 390, y, font, 8, rgb(0.5,0.5,0.5));
+  addText(page, d.sigDate || d.appDate || '', 420, y, bold, 11);
+  y -= 30;
+
+  if (d.signature) {
+    try {
+      const sigBytes = Buffer.from(d.signature, 'base64');
+      const sigImg = await doc.embedPng(sigBytes);
+      const {width:sw, height:sh} = sigImg.scale(1);
+      const sigW = Math.min(180, sw), sigH = (sh/sw)*sigW;
+      page.drawImage(sigImg, {x:40, y:y-sigH, width:sigW, height:sigH});
+      y -= sigH + 6;
+    } catch(e) { y -= 30; }
+  } else { y -= 30; }
+
+  page.drawLine({ start:{x:40,y}, end:{x:280,y}, thickness:0.5, color:rgb(0.3,0.3,0.3) });
+  y -= 12;
+  addText(page, 'Applicant Signature', 40, y, font, 7, rgb(0.6,0.6,0.6));
+  y -= 30;
+  addText(page, 'This form is retained in the driver qualification file per 49 CFR §391.51.', 40, y, font, 7, rgb(0.6,0.6,0.6));
+
+  return doc.save();
+}
+
 // ── merge ─────────────────────────────────────────────────────────────────────
 
 async function mergePDFs(pdfBytes) {
@@ -574,16 +647,17 @@ export default async function handler(req, res) {
   if (!d || !d.firstName || !d.lastName) return res.status(400).json({ error: 'Missing required fields' });
 
   try {
-    const [appPdf, w4Pdf, de4Pdf, i9Pdf, ddPdf, idPdf] = await Promise.all([
+    const [appPdf, w4Pdf, de4Pdf, i9Pdf, ddPdf, idPdf, clPdf] = await Promise.all([
       buildApplicationPDF(d),
       buildW4(d),
       buildDE4(d),
       buildI9(d),
       buildDirectDeposit(d),
       buildIDPage(d),
+      d.clearinghouseConsent === 'yes' ? buildClearinghousePage(d) : Promise.resolve(null),
     ]);
 
-    const combined = await mergePDFs([appPdf, w4Pdf, de4Pdf, i9Pdf, ddPdf, idPdf]);
+    const combined = await mergePDFs([appPdf, w4Pdf, de4Pdf, i9Pdf, ddPdf, idPdf, ...(clPdf ? [clPdf] : [])]);
     const b64 = Buffer.from(combined).toString('base64');
     const filename = `${d.lastName}_${d.firstName}_DriverApp_${(d.appDate||'').replace(/\//g,'-')}.pdf`;
 

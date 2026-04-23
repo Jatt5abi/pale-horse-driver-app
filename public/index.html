@@ -95,7 +95,7 @@
       <div class="field"><label>Last Name *</label><input id="lastName" type="text" autocomplete="family-name"></div>
     </div>
     <div class="row">
-      <div class="field"><label>SSN *</label><input id="ssn" type="text" placeholder="000-00-0000" maxlength="11" inputmode="numeric"></div>
+      <div class="field"><label>SSN *</label><input id="ssn" type="text" placeholder="000-00-0000" maxlength="11" inputmode="numeric" autocomplete="off"></div>
       <div class="field"><label>Date of Birth *</label><input id="dob" type="date"></div>
     </div>
   </div>
@@ -761,10 +761,10 @@ function clearData(){
 }
 
 document.getElementById('ssn').addEventListener('input',function(){
-  let val=this.value.replace(/\D/g,'');
-  if(val.length>3)val=val.slice(0,3)+'-'+val.slice(3);
-  if(val.length>7)val=val.slice(0,7)+'-'+val.slice(7,11);
-  this.value=val;
+  const d=this.value.replace(/\D/g,'').slice(0,9);
+  if(d.length>5) this.value=d.slice(0,3)+'-'+d.slice(3,5)+'-'+d.slice(5);
+  else if(d.length>3) this.value=d.slice(0,3)+'-'+d.slice(3);
+  else this.value=d;
 });
 document.querySelectorAll('[maxlength="2"]').forEach(el=>el.addEventListener('input',function(){this.value=this.value.toUpperCase();}));
 

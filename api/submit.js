@@ -743,7 +743,7 @@ export default async function handler(req, res) {
         <h2>New Driver Application</h2>
         <p><b>Name:</b> ${d.firstName} ${d.lastName}</p>
         <p><b>Position:</b> ${d.position}</p>
-        <p><b>Phone:</b> ${d.phone}</p>
+        <p><b>Phone:</b> ${fmtPhone(d.phone)}</p>
         <p><b>Email:</b> ${d.email}</p>
         <p><b>DL:</b> ${d.dlNum} ${d.dlState} Class ${d.dlClass} exp ${d.dlExp}</p>
         <p><b>Date:</b> ${d.appDate}</p>

@@ -75,9 +75,10 @@
   <button class="tab" onclick="goTab(1)">License</button>
   <button class="tab" onclick="goTab(2)">Employment</button>
   <button class="tab" onclick="goTab(3)">Experience</button>
-  <button class="tab" onclick="goTab(4)">Emergency & Tax</button>
-  <button class="tab" onclick="goTab(5)">Docs & Sig</button>
-  <button class="tab" onclick="goTab(6)">Submit</button>
+  <button class="tab" onclick="goTab(4)">Emergency</button>
+  <button class="tab" onclick="goTab(5)">Tax</button>
+  <button class="tab" onclick="goTab(6)">Docs & Sig</button>
+  <button class="tab" onclick="goTab(7)">Submit</button>
 </div>
 
 <!-- ── 0 Personal ── -->
@@ -354,6 +355,15 @@
     <div class="field" style="margin-top:14px"><label>Type Full Name to Sign *</label><input id="sigName" type="text" placeholder="Full legal name"></div>
     <div class="field"><label>Date *</label><input id="sigDate" type="date"></div>
   </div>
+  <div class="nav-btns">
+    <button class="btn btn-secondary" onclick="goTab(3)">← Back</button>
+    <button class="btn btn-primary" onclick="nextTab(4,5)">Next: Tax →</button>
+  </div>
+</div>
+
+<!-- ── 5 Tax ── -->
+<div class="section" id="s5">
+  <div id="err5" class="alert"></div>
   <div class="card">
     <div class="card-title">Federal W-4 Withholding</div>
     <div class="tax-note">This determines your federal tax withholding. See irs.gov/w4app if unsure.</div>
@@ -417,14 +427,14 @@
   </div>
 
   <div class="nav-btns">
-    <button class="btn btn-secondary" onclick="goTab(3)">← Back</button>
-    <button class="btn btn-primary" onclick="nextTab(4,5)">Next: Docs & Sig →</button>
+    <button class="btn btn-secondary" onclick="goTab(4)">← Back</button>
+    <button class="btn btn-primary" onclick="nextTab(5,6)">Next: Docs & Sig →</button>
   </div>
 </div>
 
-<!-- ── 5 Docs & Signature ── -->
-<div class="section" id="s5">
-  <div id="err5" class="alert"></div>
+<!-- ── 6 Docs & Signature ── -->
+<div class="section" id="s6">
+  <div id="err6" class="alert"></div>
 
   <div class="card">
     <div class="card-title">Driver's License</div>
@@ -483,13 +493,13 @@
   </div>
 
   <div class="nav-btns">
-    <button class="btn btn-secondary" onclick="goTab(4)">← Back</button>
-    <button class="btn btn-primary" onclick="nextTab(5,6)">Next: Submit →</button>
+    <button class="btn btn-secondary" onclick="goTab(5)">← Back</button>
+    <button class="btn btn-primary" onclick="nextTab(6,7)">Next: Submit →</button>
   </div>
 </div>
 
-<!-- ── 6 Submit ── -->
-<div class="section" id="s6">
+<!-- ── 7 Submit ── -->
+<div class="section" id="s7">
   <div class="card">
     <div class="card-title">Ready to Submit</div>
     <p style="font-size:14px;color:#aaa;line-height:1.6;margin-bottom:16px;">Submitting will generate your complete driver file (Application + W-4 + DE-4 + I-9) and email it to Pale Horse Asphalt HR along with your ID photos.</p>
@@ -499,7 +509,7 @@
     <button class="btn btn-secondary" onclick="saveData()">💾 Save Progress</button>
     <button class="btn btn-danger" onclick="clearData()">🗑 Clear All</button>
   </div>
-  <div class="nav-btns"><button class="btn btn-secondary" onclick="goTab(5)">← Back</button></div>
+  <div class="nav-btns"><button class="btn btn-secondary" onclick="goTab(6)">← Back</button></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -593,7 +603,7 @@ function clearSig() { sigPad.clear(); }
 const _baseGoTab = goTab;
 goTab = function(n) {
   _baseGoTab(n);
-  if(n===5) setTimeout(()=>sigPad.setup(), 60);
+  if(n===6) setTimeout(()=>sigPad.setup(), 60);
 };
 
 function radio(name, val) {
@@ -662,13 +672,17 @@ const tabRules = {
   4: () => {
     const errs=[];
     [['ecName','Emergency Contact Name'],['ecRel','Emergency Contact Relationship'],['ecPhone','Emergency Contact Phone'],['sigName','Signature (typed name)'],['sigDate','Signature Date']].forEach(([id,lbl])=>{ if(!v(id)){markErr(id);errs.push(lbl+' is required');} });
+    return errs;
+  },
+  5: () => {
+    const errs=[];
     if(!v('w4FilingStatus')){markErr('w4FilingStatus');errs.push('Federal W-4 filing status required');}
     if(!v('de4FilingStatus')){markErr('de4FilingStatus');errs.push('CA DE-4 filing status required');}
     [['bankName','Bank Name'],['routingNum','Routing Number'],['accountNum','Account Number']].forEach(([id,lbl])=>{ if(!v(id)){markErr(id);errs.push(lbl+' is required');} });
     if(!state.acctType){document.getElementById('rg_acctType').classList.add('err');errs.push('Account type required');}
     return errs;
   },
-  5: () => {
+  6: () => {
     const errs=[];
     if(!uploads.dlFront) errs.push('DL front photo required');
     if(!uploads.dlBack) errs.push('DL back photo required');

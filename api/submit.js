@@ -24,6 +24,13 @@ function addText(page, txt, x, y, font, size, color=rgb(0,0,0)) {
   page.drawText(String(txt), { x, y, size, font, color });
 }
 
+function fmtPhone(p) {
+  const d = (p||'').replace(/\D/g,'');
+  if (d.length === 10) return `${d.slice(0,3)}-${d.slice(3,6)}-${d.slice(6)}`;
+  if (d.length === 11 && d[0]==='1') return `${d.slice(1,4)}-${d.slice(4,7)}-${d.slice(7)}`;
+  return p||'';
+}
+
 function field(page, label, value, x, y, labelFont, valueFont, labelSz=8, valueSz=11) {
   addText(page, label.toUpperCase(), x, y, labelFont, labelSz, rgb(0.5,0.5,0.5));
   addText(page, value || '—', x, y - 14, valueFont, valueSz, rgb(0,0,0));
@@ -81,7 +88,7 @@ async function buildApplicationPDF(d) {
     ['Full Name', `${d.firstName} ${d.lastName}`],
     ['SSN', d.ssn],
     ['Date of Birth', d.dob],
-    ['Phone', d.phone],
+    ['Phone', fmtPhone(d.phone)],
     ['Email', d.email],
     ['Work Eligible (US)', d.eligible],
     ['Address', `${d.street}, ${d.city}, ${d.state} ${d.zip}`],
@@ -111,13 +118,15 @@ async function buildApplicationPDF(d) {
     y = sectionHeader(page, `Employer ${num}`, y, bold, W);
     y = twoCol(page, [
       ['Company', name],
-      ['Phone', phone],
-      ['Address', `${addr}, ${city}, ${st} ${zip}`],
+      ['Phone', fmtPhone(phone)],
+      ['Street', addr],
+      ['City / State / ZIP', `${city}, ${st} ${zip}`],
       ['Supervisor', sup],
       ['Position', title],
       ['Dates', `${from} – ${to}`],
       ['Reason Left', reason],
       ['May Contact', contact],
+      ['', ''],
     ], y, font, bold, W);
     y -= 8;
   };
@@ -167,7 +176,7 @@ async function buildApplicationPDF(d) {
   y = twoCol(page, [
     ['Name', d.ecName],
     ['Relationship', d.ecRel],
-    ['Phone', d.ecPhone],
+    ['Phone', fmtPhone(d.ecPhone)],
     ['', ''],
   ], y, font, bold, W);
   y -= 8;
@@ -346,11 +355,15 @@ async function buildDE4(d) {
   addText(page, 'ALLOWANCES', 40, y, bold, 10, rgb(0.91,0.45,0.04));
   y -= 20;
   const allow = d.de4Allowances || '1';
-  addText(page, `Line 1a  Allowances from Worksheet A:                                          ${allow}`, 40, y, font, 10); y -= 18;
-  addText(page, `Line 1b  Allowances from Worksheet B (itemized deductions):                    0`, 40, y, font, 10); y -= 18;
-  addText(page, `Line 1c  Total allowances (1a + 1b):                                           ${allow}`, 40, y, bold, 10); y -= 18;
-  addText(page, `Line 2   Additional withholding per payroll period:                  $${d.de4Extra||'0'}`, 40, y, font, 10); y -= 18;
-  addText(page, `Line 3   Exempt from CA withholding:                                            ${d.de4Exempt==='yes'?'YES':'No'}`, 40, y, font, 10); y -= 30;
+  const de4Val = (label, val, f=font) => {
+    addText(page, label, 40, y, f, 10); addText(page, String(val), 520, y, f, 10); y -= 18;
+  };
+  de4Val('Line 1a  Allowances from Worksheet A:', allow);
+  de4Val('Line 1b  Allowances from Worksheet B (itemized deductions):', '0');
+  de4Val('Line 1c  Total allowances (1a + 1b):', allow, bold);
+  de4Val('Line 2   Additional withholding per payroll period:', `$${d.de4Extra||'0'}`);
+  de4Val('Line 3   Exempt from CA withholding:', d.de4Exempt==='yes'?'YES':'No');
+  y -= 12;
 
   addText(page, 'CERTIFICATION', 40, y, bold, 10, rgb(0.91,0.45,0.04));
   y -= 16;
@@ -405,7 +418,7 @@ async function buildI9(d) {
     ['Date of Birth', d.dob],
     ['SSN', d.ssn],
     ['Email', d.email],
-    ['Phone', d.phone],
+    ['Phone', fmtPhone(d.phone)],
     ['Address', d.street],
     [''],
     ['City', d.city],
@@ -588,16 +601,13 @@ async function buildIDPage(d) {
       try {
         const bytes = Buffer.from(d.medCard, 'base64');
         const embPages = await doc.embedPdf(bytes); // all pages
-        for (const embPage of embPages) {
+        for (let pi = 0; pi < embPages.length; pi++) {
+          if (pi > 0) { page = doc.addPage([612, 792]); my = 750; }
+          const embPage = embPages[pi];
           const { width: pw, height: ph } = embPage;
           const scale = Math.min(532/pw, (my - 40)/ph);
           const w = pw*scale, h = ph*scale;
           page.drawPage(embPage, { x: 40, y: my - h, width: w, height: h });
-          my -= h + 10;
-          if (my < 80) {
-            page = doc.addPage([612, 792]);
-            my = 760;
-          }
         }
       } catch(e) {
         addText(page, 'Medical card PDF could not be rendered.', 40, my, font, 10, rgb(0.8,0.2,0.2));

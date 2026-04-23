@@ -689,7 +689,7 @@ const sigPad = (() => {
     const src = e.touches ? e.touches[0] : e;
     return { x: src.clientX - r.left, y: src.clientY - r.top };
   };
-  const start = e => { e.preventDefault(); init(); const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); drawing=true; };
+  const start = e => { e.preventDefault(); const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); drawing=true; };
   const move = e => { e.preventDefault(); if(!drawing)return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); empty=false; };
   const end = () => { drawing=false; };
   return {

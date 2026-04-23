@@ -587,12 +587,18 @@ async function buildIDPage(d) {
     if (d.medCardIsPdf) {
       try {
         const bytes = Buffer.from(d.medCard, 'base64');
-        const [embPage] = await doc.embedPdf(bytes, [0]);
-        const { width: pw, height: ph } = embPage;
-        const maxH = my - 40;
-        const scale = Math.min(532/pw, maxH/ph);
-        const w = pw*scale, h = ph*scale;
-        page.drawPage(embPage, { x: 40, y: my - h, width: w, height: h });
+        const embPages = await doc.embedPdf(bytes); // all pages
+        for (const embPage of embPages) {
+          const { width: pw, height: ph } = embPage;
+          const scale = Math.min(532/pw, (my - 40)/ph);
+          const w = pw*scale, h = ph*scale;
+          page.drawPage(embPage, { x: 40, y: my - h, width: w, height: h });
+          my -= h + 10;
+          if (my < 80) {
+            page = doc.addPage([612, 792]);
+            my = 760;
+          }
+        }
       } catch(e) {
         addText(page, 'Medical card PDF could not be rendered.', 40, my, font, 10, rgb(0.8,0.2,0.2));
       }

@@ -429,13 +429,12 @@ async function buildI9(d) {
 
   addText(page, 'ATTESTATION OF CITIZENSHIP / IMMIGRATION STATUS — check one:', 40, y, bold, 9);
   y -= 20;
-  addText(page, '[ ]  1. A citizen of the United States', 40, y, font, 10);
-  y -= 18;
-  addText(page, '[ ]  2. A noncitizen national of the United States', 40, y, font, 10);
-  y -= 18;
-  addText(page, '[ ]  3. A lawful permanent resident  (Alien Registration No.: ________________)', 40, y, font, 10);
-  y -= 18;
-  addText(page, '[ ]  4. An alien authorized to work until: ________________', 40, y, font, 10);
+  const cs = d.citizenStatus||'';
+  const chk = s => cs===s?'[X]':'[ ]';
+  addText(page, `${chk('citizen')}  1. A citizen of the United States`, 40, y, cs==='citizen'?bold:font, 10); y -= 18;
+  addText(page, `${chk('national')}  2. A noncitizen national of the United States`, 40, y, cs==='national'?bold:font, 10); y -= 18;
+  addText(page, `${chk('lpr')}  3. A lawful permanent resident  (Alien Registration No.: ${d.alienReg||'________________'})`, 40, y, cs==='lpr'?bold:font, 10); y -= 18;
+  addText(page, `${chk('alien')}  4. An alien authorized to work until: ${d.alienExpiry||'________________'}  (USCIS No.: ${d.alienReg||'________________'})`, 40, y, cs==='alien'?bold:font, 10);
   y -= 30;
 
   addText(page, 'EMPLOYEE SIGNATURE', 40, y, bold, 10, rgb(0.91,0.45,0.04));
@@ -461,15 +460,17 @@ async function buildI9(d) {
 
   addText(page, 'SECTION 2 — EMPLOYER REVIEW (completed by employer on or before first day of work)', 40, y, bold, 10, rgb(0.91,0.45,0.04));
   y -= 16;
-  addText(page, 'List A — Identity and Employment Authorization', 40, y, bold, 9);
-  y -= 16;
-  addText(page, 'Document Title: _______________________  Issuing Authority: _______________________', 40, y, font, 10);
-  y -= 18;
-  addText(page, 'Document Number: _______________________  Expiration Date: _______________________', 40, y, font, 10);
-  y -= 24;
-  addText(page, '— OR —', 40, y, font, 9, rgb(0.5,0.5,0.5));
-  y -= 16;
-  addText(page, 'List B (Identity): _______________________  List C (Employment Auth): _______________________', 40, y, font, 10);
+  const docLabels = {
+    passport:'US Passport', greencard:'Permanent Resident Card (I-551)',
+    ss:'Social Security Card', birth:'Birth Certificate', citizen_cert:'US Citizenship Certificate'
+  };
+  const listA = ['passport','greencard'].includes(d.i9DocType);
+  addText(page, 'List A — Identity and Employment Authorization', 40, y, bold, 9); y -= 16;
+  addText(page, `Document Title: ${listA ? docLabels[d.i9DocType]||'___________' : '___________'}  Issuing Authority: ${listA ? 'US Government' : '___________'}`, 40, y, font, 10); y -= 18;
+  addText(page, 'Document Number: _______________________  Expiration Date: _______________________', 40, y, font, 10); y -= 24;
+  addText(page, '— OR —', 40, y, font, 9, rgb(0.5,0.5,0.5)); y -= 16;
+  const listBC = !listA && d.i9DocType;
+  addText(page, `List B (Identity): Driver License  List C (Employment Auth): ${listBC ? docLabels[d.i9DocType]||'___________' : '___________'}`, 40, y, font, 10);
   y -= 28;
   addText(page, 'I attest that I have examined the document(s), and that the individual is authorized to work in the US.', 40, y, font, 8, rgb(0.4,0.4,0.4));
   y -= 20;

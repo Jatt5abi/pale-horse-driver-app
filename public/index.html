@@ -530,6 +530,30 @@
   </div>
 
   <div class="card">
+    <div class="card-title">I-9 Citizenship / Employment Eligibility *</div>
+    <div class="tax-note">Required by federal law. Select your status and the document(s) you will present to your employer.</div>
+    <div class="field"><label>I am (select one) *</label>
+      <div class="radio-group" id="rg_citizenStatus">
+        <div class="radio-opt" id="citizenStatus_citizen" onclick="radio('citizenStatus','citizen');i9Fields()">A citizen of the United States</div>
+        <div class="radio-opt" id="citizenStatus_national" onclick="radio('citizenStatus','national');i9Fields()">A noncitizen national of the United States</div>
+        <div class="radio-opt" id="citizenStatus_lpr" onclick="radio('citizenStatus','lpr');i9Fields()">Lawful permanent resident (Green Card)</div>
+        <div class="radio-opt" id="citizenStatus_alien" onclick="radio('citizenStatus','alien');i9Fields()">Alien authorized to work</div>
+      </div>
+    </div>
+    <div class="field" id="field_alienReg" style="display:none"><label>Alien Reg / USCIS Number *</label><input id="alienReg" type="text" placeholder="A-XXXXXXXXX"></div>
+    <div class="field" id="field_alienExpiry" style="display:none"><label>Work Authorization Expiry *</label><input id="alienExpiry" type="date"></div>
+    <div class="field"><label>Document(s) you will present *</label>
+      <div class="radio-group" id="rg_i9DocType">
+        <div class="radio-opt" id="i9DocType_passport" onclick="radio('i9DocType','passport')">US Passport</div>
+        <div class="radio-opt" id="i9DocType_greencard" onclick="radio('i9DocType','greencard')">Permanent Resident Card (Green Card)</div>
+        <div class="radio-opt" id="i9DocType_ss" onclick="radio('i9DocType','ss')">Social Security Card + State ID/DL</div>
+        <div class="radio-opt" id="i9DocType_birth" onclick="radio('i9DocType','birth')">Birth Certificate + State ID/DL</div>
+        <div class="radio-opt" id="i9DocType_citizen_cert" onclick="radio('i9DocType','citizen_cert')">US Citizenship Certificate + State ID/DL</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
     <div class="card-title">Signature *</div>
     <p style="font-size:12px;color:#888;margin-bottom:12px">Sign in the white box below using your finger or mouse.</p>
     <div class="sig-pad-wrap">
@@ -606,6 +630,12 @@ function handleUpload(input, key, prevId, boxId) {
     img.src = e.target.result;
   };
   reader.readAsDataURL(file);
+}
+
+function i9Fields() {
+  const s = state.citizenStatus;
+  document.getElementById('field_alienReg').style.display = (s==='lpr'||s==='alien') ? '' : 'none';
+  document.getElementById('field_alienExpiry').style.display = s==='alien' ? '' : 'none';
 }
 
 function buildHOSGrid() {
@@ -814,6 +844,9 @@ const tabRules = {
     }
     if(!uploads.id2) errs.push('Second ID photo required');
     if(!state.id2Type) errs.push('Second ID type required');
+    if(!state.citizenStatus) errs.push('Citizenship / eligibility status required (I-9)');
+    if((state.citizenStatus==='lpr'||state.citizenStatus==='alien') && !v('alienReg')) errs.push('Alien Registration / USCIS number required');
+    if(!state.i9DocType) errs.push('I-9 document type required');
     if(sigPad.isEmpty()) errs.push('Signature required — please sign in the box');
     return errs;
   },
@@ -872,6 +905,8 @@ function collectData() {
     medCard: uploads.medCard, medCardIsPdf: uploads.medCardIsPdf||false,
     id2: uploads.id2, id2IsPdf: uploads.id2IsPdf||false, id2Type: state.id2Type||'',
     hosLog: collectHOSLog(),
+    citizenStatus: state.citizenStatus||'', alienReg: v('alienReg'), alienExpiry: fmt(v('alienExpiry')),
+    i9DocType: state.i9DocType||'',
     signature: sigPad.toBase64(),
   };
 }
@@ -941,6 +976,6 @@ loadData();
 updateClassAFields();
 if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
 </script>
-<div style="text-align:center;padding:16px 0 8px;font-size:11px;color:#555">v14</div>
+<div style="text-align:center;padding:16px 0 8px;font-size:11px;color:#555">v15</div>
 </body>
 </html>
